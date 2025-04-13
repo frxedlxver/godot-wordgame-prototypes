@@ -1,12 +1,14 @@
 class_name UnscramblerTester extends Node
 
+@export var def_getter_scn : PackedScene 
+
 class kvp:
 	var key = ""
 	var value = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	var word = "flagsol"
+	var word = "ghsdome"
 	log_all_permutations(word)
 	find_highest_scoring(word)
 	
@@ -23,6 +25,9 @@ func find_highest_scoring(scrambled_text : String):
 			max.value = scored_words[word]
 	
 	print("highest scoring word is %s, for %d points" % [max.key, max.value])
+	var def = def_getter_scn.instantiate()
+	def.word_to_check = max.key
+	self.add_child(def)
 
 func log_all_permutations(scrambled_text : String):
 	var t = Time.get_ticks_usec()
