@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://jb12j5p22epv"]
+
+[ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
+[ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://board.tscn" id="2_qxoxs"]
+[ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="3_0e3vv"]
+[ext_resource type="Script" path="res://src/deck_node.gd" id="4_4et1b"]
+
+[sub_resource type="GDScript" id="GDScript_24kty"]
+script/source = "class_name TileHandler extends Node2D
+
+@export var hand : Hand
+@export var board : Board
+"
+
+[node name="Node2D" type="Node2D" node_paths=PackedStringArray("hand", "bag", "board")]
+script = ExtResource("1_kiayv")
+hand = NodePath("Hand")
+bag = NodePath("Bag")
+board = NodePath("Board")
+
+[node name="Board" parent="." instance=ExtResource("2_qxoxs")]
+
+[node name="Hand" parent="." instance=ExtResource("3_0e3vv")]
+position = Vector2(380, 336)
+
+[node name="Bag" type="Node2D" parent="."]
+script = ExtResource("4_4et1b")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Bag"]
+offset_left = 6.0
+offset_top = 255.0
+offset_right = 126.0
+offset_bottom = 295.0
+text = "Tiles in bag:"
+
+[node name="TextEdit" type="TextEdit" parent="Bag"]
+offset_left = 13.0
+offset_top = 278.0
+offset_right = 91.0
+offset_bottom = 347.0
+theme_override_font_sizes/font_size = 25
+
+[node name="TileHandler" type="Node2D" parent="."]
+script = SubResource("GDScript_24kty")

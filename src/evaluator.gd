@@ -1,86 +1,123 @@
-# tabs for indentation, per your style note
+# tabs for indentation
 class_name Evaluator extends Node2D
 
 static var board_size : Vector2i = Board.board_size
 const MIN_WORD_LEN := 2
 
-static func evaluate_board(board : Array[Array]) -> void:
-	# 1) find all horizontal words and mark the tiles they cover
-	var h_return = _scan(board, true)
-	var horiz_words = h_return[0]
-	var horiz_cover = h_return[1]
-	# 2) find all vertical words and mark the tiles they cover
-	var v_return = _scan(board, false)
-	var vert_words = v_return[0]
-	var vert_cover = v_return[1]
-	
-	# 3) validate every ≥2-letter word
-	var bad_words : Array[String] = []
-	for w in horiz_words + vert_words:
-		if not WORD_CHECKER.check_for_word(w):
-			bad_words.append(w)
+static func evaluate_board(board : Array[Array]):
+	# ── 1. scan both directions ───────────────────────────────────────
+	var h_ret = _scan(board, true)
+	var h_infos  = h_ret[0]		# [{word:String, coords:Array[Vector2i]}, …]
+	var h_cover  = h_ret[1]		# bool grid: any ≥2-letter horiz run
 
-	# 4) verify every tile is in at least one covered set
-	var orphans : Array[Vector2i] = []
+	var v_ret = _scan(board, false)
+	var v_infos = v_ret[0]
+	var v_cover = v_ret[1]
+
+	# ── 2. build cover grid for *valid* words only ────────────────────
+	var legal_cover : Array = []
+	for y in range(board_size.y):
+		legal_cover.append([])
+		for x in range(board_size.x):
+			legal_cover[y].append(false)
+
+	var add_to_legal_cover = func(coords : Array):
+		for p in coords:
+			legal_cover[p.y][p.x] = true
+
+	for info in h_infos:
+		if info["word"].length() >= MIN_WORD_LEN and WORD_CHECKER.check_for_word(info["word"]):
+			add_to_legal_cover.call(info["coords"])
+	for info in v_infos:
+		if info["word"].length() >= MIN_WORD_LEN and WORD_CHECKER.check_for_word(info["word"]):
+			add_to_legal_cover.call(info["coords"])
+
+	# ── 3. collect bad words and their *exclusive* tiles ──────────────
+	var bad_words    : Array[String]   = []
+	var illegal_tiles: Array[Vector2i] = []
+
+	var push_tiles_if_exclusive = func(info):
+		var push = false
+		if info["word"].length() >= MIN_WORD_LEN and not WORD_CHECKER.check_for_word(info["word"]):
+			bad_words.append(info["word"])
+			push = true
+		if push:
+			for p in info["coords"]:
+				if not legal_cover[p.y][p.x]:	# skip shared letters (e.g. the “I”)
+					illegal_tiles.append(p)
+
+
+	for info in h_infos:
+		push_tiles_if_exclusive.call(info)
+	for info in v_infos:
+		push_tiles_if_exclusive.call(info)
+
+	# ── 4. add orphan tiles (not in *any* ≥2-letter run) ──────────────
 	for y in range(board_size.y):
 		for x in range(board_size.x):
 			if board[y][x] != "":
-				if not (horiz_cover[y][x] or vert_cover[y][x]):
-					orphans.append(Vector2i(x, y))
+				if not (h_cover[y][x] or v_cover[y][x]):
+					illegal_tiles.append(Vector2i(x, y))
 
-	# 5) report
-	if bad_words.is_empty() and orphans.is_empty():
+	# ── 5. deduplicate tiles (Array.unique() isn’t available) ─────────
+	var seen := {}
+	var dedup : Array[Vector2i] = []
+	for p in illegal_tiles:
+		if not seen.has(p):
+			seen[p] = true
+			dedup.append(p)
+	illegal_tiles = dedup
+
+	# ── 6. report ─────────────────────────────────────────────────────
+	if bad_words.is_empty() and illegal_tiles.is_empty():
 		print("legal")
 	else:
 		if bad_words.size() > 0:
 			print("illegal – bad words:", bad_words)
-		if orphans.size() > 0:
-			print("illegal – orphan tiles at:", orphans)
+		if illegal_tiles.size() > 0:
+			print("illegal – tiles at:", illegal_tiles)
+			
+	return illegal_tiles
 
 
-# ───────────────── helpers ─────────────────
+# ───────────────── helpers ────────────────────────────────────────────
 static func _scan(board : Array[Array], horizontal : bool):
-	# returns [Array[String] words, Array[Array[bool]] cover_grid]
-	var words  : Array[String] = []
-	var cover  : Array = []
-	for _i in range(board_size.y):
-		cover.append([])						# bool grid same size as board
-		for _j in range(board_size.x):
-			cover[_i].append(false)
+	# returns [Array[Dictionary] infos, Array[Array[bool]] cover_grid]
+	# each info = { "word": String, "coords": Array[Vector2i] }
 
-	var outer := board_size.y if horizontal else board_size.x
-	var inner := board_size.x if horizontal else board_size.y
+	var infos : Array = []
+	var cover : Array = []
+	for _y in range(board_size.y):
+		cover.append([])
+		for _x in range(board_size.x):
+			cover[_y].append(false)
+
+	var outer = board_size.y if horizontal else board_size.x
+	var inner = board_size.x if horizontal else board_size.y
 
 	for i in range(outer):
-		var current := ""
+		var current   := ""
 		var start_pos := -1
 		for j in range(inner):
-			var y := i
-			var x := j
-			if not horizontal:
-				y = j
-				x = i
+			var y = i if horizontal else j
+			var x = j if horizontal else i
 			var ch = board[y][x]
 
 			if ch != "":
 				if current == "":
-					start_pos = j			# first letter in this run
+					start_pos = j
 				current += ch
 			if ch == "" or j == inner - 1:
-				if current.length() >= MIN_WORD_LEN:
-					words.append(current)
-					# mark covered tiles for this word
+				if current.length() > 0:
+					var coords : Array[Vector2i] = []
 					for k in range(current.length()):
-						var yy := y
-						var xx := x
-						if horizontal:
-							yy = i
-							xx = start_pos + k
-						else:
-							yy = start_pos + k
-							xx = i
-						cover[yy][xx] = true
-				# reset for next run
-				current = ""
+						var yy = i if horizontal else start_pos + k
+						var xx = start_pos + k if horizontal else i
+						coords.append(Vector2i(xx, yy))
+						if current.length() >= MIN_WORD_LEN:
+							cover[yy][xx] = true
+					infos.append({ "word": current, "coords": coords })
+				current   = ""
+				start_pos = -1
 	# done
-	return [words, cover]
+	return [infos, cover]

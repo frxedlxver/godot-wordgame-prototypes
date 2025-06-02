@@ -39,7 +39,9 @@ func _ready() -> void:
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_0:
-		Evaluator.evaluate_board(board_state_text)
+		var illegal_tiles = Evaluator.evaluate_board(board_state_text)
+		for tile in illegal_tiles:
+			board_state[tile.y][tile.x].tile.self_modulate = Color.RED
 			
 func place_tile_at(game_tile : GameTile, slot : Slot):
 	var tw = create_tween()
