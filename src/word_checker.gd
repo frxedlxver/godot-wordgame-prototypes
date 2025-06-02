@@ -25,7 +25,7 @@ func check_for_word(word : String) -> bool:
 	if debug_print:
 		print("checking for word: %s" % word)
 		
-	if dict.has(word):
+	if dict.has(word.to_lower()):
 		if debug_print:
 			print("found word %s!" % word)
 		return true

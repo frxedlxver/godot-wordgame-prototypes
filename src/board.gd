@@ -36,7 +36,10 @@ func _ready() -> void:
 			slot.coordinates = Vector2i(x, y)
 			board_state[y][x] = SlotTileStruct.new(slot)
 			slot.highlighted.connect(_slot_highlighted)
-			
+
+func _input(event):
+	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_0:
+		Evaluator.evaluate_board(board_state_text)
 			
 func place_tile_at(game_tile : GameTile, slot : Slot):
 	var tw = create_tween()
