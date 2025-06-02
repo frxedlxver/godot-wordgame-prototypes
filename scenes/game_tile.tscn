@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://d0qbjjhu3adne"]
+
+[ext_resource type="Texture2D" uid="uid://c87q5xsoyqruy" path="res://sprites/tile.png" id="1_ydtsf"]
+[ext_resource type="Script" path="res://src/gametile.gd" id="2_0evji"]
+[ext_resource type="Texture2D" uid="uid://j3r5xangghk8" path="res://sprites/scoretab.png" id="3_04uoi"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r1h57"]
+size = Vector2(32, 32)
+
+[node name="GameTile" type="Sprite2D"]
+position = Vector2(298, 188)
+texture = ExtResource("1_ydtsf")
+script = ExtResource("2_0evji")
+
+[node name="Letter" type="Sprite2D" parent="."]
+z_index = 2
+
+[node name="scoretab" type="Sprite2D" parent="Letter"]
+position = Vector2(12, -12)
+texture = ExtResource("3_04uoi")
+
+[node name="NumberTens" type="Sprite2D" parent="Letter/scoretab"]
+
+[node name="NumberOnes" type="Sprite2D" parent="Letter/scoretab"]
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_r1h57")
+
+[node name="TextEdit" type="RichTextLabel" parent="."]
+offset_left = -21.0
+offset_top = 4.0
+offset_right = 25.0
+offset_bottom = 25.0

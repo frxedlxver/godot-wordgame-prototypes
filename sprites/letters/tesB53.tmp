@@ -1,0 +1,23 @@
+[gd_scene load_steps=6 format=3 uid="uid://jb12j5p22epv"]
+
+[ext_resource type="Script" path="res://sprites/Letters/main.gd" id="1_3khqg"]
+[ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://board.tscn" id="1_bfyku"]
+[ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="3_gudum"]
+[ext_resource type="Script" path="res://src/deck_node.gd" id="4_66db0"]
+[ext_resource type="Script" path="res://src/tile_handler.gd" id="5_7cm3u"]
+
+[node name="Node2D" type="Node2D" node_paths=PackedStringArray("hand", "deck", "board")]
+script = ExtResource("1_3khqg")
+hand = NodePath("Hand")
+deck = NodePath("Deck")
+board = NodePath("Board")
+
+[node name="Board" parent="." instance=ExtResource("1_bfyku")]
+
+[node name="Hand" parent="." instance=ExtResource("3_gudum")]
+
+[node name="Deck" type="Node2D" parent="."]
+script = ExtResource("4_66db0")
+
+[node name="TileHandler" type="Node2D" parent="."]
+script = ExtResource("5_7cm3u")
