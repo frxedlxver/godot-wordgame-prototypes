@@ -134,9 +134,9 @@ func get_highlighted_slot():
 	for col in contacts:
 		var area_owner = col.collider.get_parent()
 		if area_owner is Slot:
-			return area_owner
+			return area_owner if area_owner.empty() else null
 			
 	return null
 		
-
-	
+func tile_count():
+	return game_tiles.size()

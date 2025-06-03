@@ -2,14 +2,17 @@ class_name GameTile extends Sprite2D
 
 enum TileState {
 	IDLE,
-	GRABBED,
+	GRABBED_FROM_HAND,
 	RELEASED,
-	PLACED_ON_BOARD
+	PLACED_ON_BOARD,
+	GRABBED_FROM_BOARD,
+	LOCKED_IN
 }
 
 enum VisualState {
 	NORMAL,
-	HOVERED
+	HOVERED,
+	LOCKED_IN
 }
 
 signal grabbed(GameTile)
@@ -18,7 +21,9 @@ signal return_to_hand(GameTile)
 
 var state : TileState
 var visual_state : VisualState
-var coordinates : Vector2i
+var coordinates : Vector2i = -Vector2i.ONE
+
+var color_tween : Tween
 
 var mouse_inside : bool
 var _letter : String
@@ -53,16 +58,18 @@ func _ready():
 	$Area2D.mouse_exited.connect(_area2d_mouse_exited)
 
 func _process(delta: float) -> void:
-	if self.state == TileState.GRABBED:
+	if self.state == TileState.GRABBED_FROM_HAND or self.state == TileState.GRABBED_FROM_BOARD:
 		self.global_position = get_global_mouse_position()
 	if self.state == TileState.RELEASED:
 		set_state(TileState.IDLE)
 
 func set_state(new_state : TileState):
+	if self.state == new_state:
+		return
 	self.state = new_state
 	match new_state:
-		TileState.GRABBED:
-			$TextEdit.text = "GRBD"
+		TileState.GRABBED_FROM_HAND:
+			$TextEdit.text = "GRBH"
 			grabbed.emit(self)
 			print("grabbed")
 		TileState.RELEASED:
@@ -73,8 +80,18 @@ func set_state(new_state : TileState):
 			$TextEdit.text = "IDLE"
 			return_to_hand.emit(self)
 			print("return requested")
+
 		TileState.PLACED_ON_BOARD:
 			$TextEdit.text = "PLCD"
+		TileState.GRABBED_FROM_BOARD:
+			$TextEdit.text = "GRBB"
+			grabbed.emit(self)
+			print("grabbed_from_board")
+		TileState.LOCKED_IN:
+			$Area2D.input_event.disconnect(_area2d_input_event)
+			$Area2D.mouse_entered.disconnect(_area2d_mouse_entered)
+			$Area2D.mouse_exited.disconnect(_area2d_mouse_exited)
+			self.set_visual_state(VisualState.LOCKED_IN)
 
 func set_visual_state(new_state : VisualState):
 	if new_state == self.visual_state: return
@@ -88,12 +105,20 @@ func set_visual_state(new_state : VisualState):
 			self.scale = Vector2(1.1, 1.1)
 			self.self_modulate = Color8(255,230,230,255)
 			pass
+		VisualState.LOCKED_IN:
+			self.scale = Vector2.ONE
+			self.self_modulate = Color.GRAY
+			kill_tweens()
 
 func _area2d_input_event(viewport, event, shape_idx):
 	if event.is_action_pressed("grab_tile"):
-		set_state(TileState.GRABBED)
+		if self.state == TileState.PLACED_ON_BOARD:
+			set_state(TileState.GRABBED_FROM_BOARD)
+		else:
+			set_state(TileState.GRABBED_FROM_HAND)
 	elif event.is_action_released("grab_tile"):
-		set_state(TileState.RELEASED)
+		if state == TileState.GRABBED_FROM_HAND or state == TileState.GRABBED_FROM_BOARD:
+			set_state(TileState.RELEASED)
 	elif event.is_action_pressed("return_tile_to_hand"):
 		set_state(TileState.IDLE)
 
@@ -104,6 +129,39 @@ func _area2d_mouse_entered():
 func _area2d_mouse_exited():
 	set_visual_state(VisualState.NORMAL)
 	pass
+	
+func release_from_board():
+	set_state(TileState.IDLE)
+
 func placed_on_board():
 	print("placed on board")
 	set_state(TileState.PLACED_ON_BOARD)
+	
+func bzzt():
+	self_modulate = Color.RED
+	run_color_tween()
+
+func ding():
+	self_modulate = Color.GREEN
+	run_color_tween()
+	
+func lock_in():
+	set_state(TileState.LOCKED_IN)
+	
+func kill_tweens():
+	if color_tween:
+		color_tween.kill()
+
+func run_color_tween(length : float = 0.7, end_color : Color = Color.WHITE, wait : bool = false):
+	if color_tween:
+		color_tween.kill()
+	color_tween = create_tween()
+	color_tween.set_ease(Tween.EASE_IN)
+	color_tween.tween_property(self, "self_modulate", end_color, length)
+	if (wait):
+		await color_tween.finished
+	
+func animate_score():
+	self.self_modulate = Color.GREEN
+	await run_color_tween(0.2, Color.GRAY, true)
+	

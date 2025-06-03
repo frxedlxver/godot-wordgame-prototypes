@@ -4,6 +4,7 @@ signal highlighted(Slot)
 signal unhighlighted(Slot)
 
 var coordinates : Vector2i
+var has_tile : bool = false
 
 func _ready() -> void:
 	$Area2D.mouse_entered.connect(_area2d_mouse_entered)
@@ -16,3 +17,6 @@ func _area2d_mouse_entered():
 func _area2d_mouse_exited():
 	self_modulate = Color.WHITE
 	unhighlighted.emit(self)
+
+func empty():
+	return !has_tile

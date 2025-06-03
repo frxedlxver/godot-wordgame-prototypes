@@ -67,6 +67,19 @@ static func evaluate_board(board : Array[Array]):
 			seen[p] = true
 			dedup.append(p)
 	illegal_tiles = dedup
+	
+	# ── 6. collect legal tiles ────────────────────────────────────────
+	var illegal_set : Dictionary = {}
+	for p in illegal_tiles:
+		illegal_set[p] = true
+
+	var legal_tiles : Array[Vector2i] = []
+	for y in range(board_size.y):
+		for x in range(board_size.x):
+			if board[y][x] != "":
+				var pos := Vector2i(x, y)
+				if not illegal_set.has(pos):
+					legal_tiles.append(pos)
 
 	# ── 6. report ─────────────────────────────────────────────────────
 	if bad_words.is_empty() and illegal_tiles.is_empty():
@@ -77,7 +90,7 @@ static func evaluate_board(board : Array[Array]):
 		if illegal_tiles.size() > 0:
 			print("illegal – tiles at:", illegal_tiles)
 			
-	return illegal_tiles
+	return { "illegal": illegal_tiles, "legal": legal_tiles }
 
 
 # ───────────────── helpers ────────────────────────────────────────────

@@ -42,19 +42,3 @@ theme_override_font_sizes/font_size = 25
 
 [node name="TileHandler" type="Node2D" parent="."]
 script = SubResource("GDScript_24kty")
-
-[node name="TotalScore" type="RichTextLabel" parent="."]
-offset_left = 1.0
-offset_top = -1.0
-offset_right = 152.0
-offset_bottom = 56.0
-theme_override_font_sizes/normal_font_size = 30
-text = "Score: 0"
-
-[node name="TurnScore" type="RichTextLabel" parent="."]
-offset_left = 1.0
-offset_top = 45.0
-offset_right = 152.0
-offset_bottom = 102.0
-theme_override_font_sizes/normal_font_size = 30
-text = "Score: 0"
