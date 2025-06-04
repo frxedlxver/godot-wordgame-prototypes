@@ -22,9 +22,11 @@ func shuffle():
 
 func draw_tile():
 	if game_tiles.size() > 0:
-		return game_tiles.pop_back()
+		var drawn_tile = game_tiles.pop_back()
 		update_tile_count()
+		return drawn_tile
 
 func update_tile_count():
+	print(game_tiles.size())
 	$TextEdit.text = str(game_tiles.size())
 	

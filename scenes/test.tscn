@@ -1,10 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=10 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="2_qxoxs"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="3_0e3vv"]
 [ext_resource type="PackedScene" uid="uid://bnn8qx884e7c2" path="res://styles/tooltip.tscn" id="3_vomhx"]
 [ext_resource type="Script" path="res://src/deck_node.gd" id="4_4et1b"]
+[ext_resource type="Script" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
+[ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
 
 [sub_resource type="GDScript" id="GDScript_24kty"]
 script/source = "class_name TileHandler extends Node2D
@@ -73,3 +76,12 @@ offset_right = 152.0
 offset_bottom = 102.0
 theme_override_font_sizes/normal_font_size = 30
 text = "Score: 0"
+
+[node name="AudioStreamManager" type="Node" parent="."]
+script = ExtResource("6_vu4vo")
+
+[node name="Bad" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("7_l8hsb")
+
+[node name="Good" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("8_io1cw")

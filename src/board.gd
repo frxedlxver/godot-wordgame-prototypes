@@ -1,7 +1,7 @@
 class_name Board extends Node2D
 
 @onready var round_manager : RoundManager = get_parent()
-const board_size : Vector2i = Vector2i(7, 7)
+const board_size : Vector2i = Vector2i(9, 9)
 const slot_size : Vector2i = Vector2i(34, 34)
 @export var slot_scene : PackedScene
 var tooltip_showing : bool = false
@@ -63,6 +63,7 @@ func validate_board() -> bool:
 		for p in illegal_tiles + legal_tiles:
 			if !board_state_placed_status[p.y][p.x]:
 				board_state[p.y][p.x].tile.bzzt()
+		AudioStreamManager.play_bad_sound()
 		return false
 
 	# ---------- positional rules ----------
@@ -221,8 +222,12 @@ func score_current_turn() -> int:
 		board_state[p.y][p.x].tile.lock_in()
 
 	var turn_points := 0
+	var good_noise_pitch = 0.0
 	for word in words:
-		turn_points += await _score_word(word)
+		turn_points += await _score_word(word, good_noise_pitch, turn_points)
+		good_noise_pitch += word["text"].length() * 0.04
+	AudioStreamManager.reset_good_pitch()
+	
 
 
 
@@ -287,17 +292,21 @@ func _tiles_of_word(start : Vector2i, step : Vector2i) -> Array[Vector2i]:
 	return coords
 
 
-func _score_word(info : Dictionary) -> int:
+func _score_word(info : Dictionary, starting_pitch : float, word_pts : int) -> int:
 	var tiles : Array = info["tiles"]
 	var word_mult := 1
 	var letter_pts := 0
 
+	var pitch_mod = starting_pitch
+	var pitch_mod_increase = 0.04
 	for pos in tiles:
 		var tile = board_state[pos.y][pos.x].tile
 		var letter_score = tile.score
 		
 		letter_pts += letter_score
-		tile_scored.emit(letter_pts)
+		tile_scored.emit(letter_pts + word_pts)
+		AudioStreamManager.play_good_sound(pitch_mod)
+		pitch_mod += pitch_mod_increase
 		await tile.animate_score()
 		
 
