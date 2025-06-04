@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=7 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
-[ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://board.tscn" id="2_qxoxs"]
+[ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="2_qxoxs"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="3_0e3vv"]
+[ext_resource type="PackedScene" uid="uid://bnn8qx884e7c2" path="res://styles/tooltip.tscn" id="3_vomhx"]
 [ext_resource type="Script" path="res://src/deck_node.gd" id="4_4et1b"]
 
 [sub_resource type="GDScript" id="GDScript_24kty"]
@@ -19,6 +20,20 @@ bag = NodePath("Bag")
 board = NodePath("Board")
 
 [node name="Board" parent="." instance=ExtResource("2_qxoxs")]
+
+[node name="DefinitionText" type="RichTextLabel" parent="Board"]
+offset_left = -249.0
+offset_top = 74.0
+offset_right = -98.0
+offset_bottom = 114.0
+theme_override_font_sizes/normal_font_size = 12
+
+[node name="TooltipPanel" parent="Board" instance=ExtResource("3_vomhx")]
+z_index = 1000
+offset_left = -256.0
+offset_top = -27.0
+offset_right = -52.0
+offset_bottom = 324.0
 
 [node name="Hand" parent="." instance=ExtResource("3_0e3vv")]
 position = Vector2(380, 336)

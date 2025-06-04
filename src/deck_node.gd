@@ -15,10 +15,16 @@ func initialize():
 
 func add_to_bag(game_tile : GameTile):
 	self.game_tiles.append(game_tile)
-	$TextEdit.text = str(game_tiles.size())
+	update_tile_count()
+	
 func shuffle():
 	game_tiles.shuffle()
 
 func draw_tile():
 	if game_tiles.size() > 0:
 		return game_tiles.pop_back()
+		update_tile_count()
+
+func update_tile_count():
+	$TextEdit.text = str(game_tiles.size())
+	

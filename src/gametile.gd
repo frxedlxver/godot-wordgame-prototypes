@@ -24,6 +24,9 @@ var visual_state : VisualState
 var coordinates : Vector2i = -Vector2i.ONE
 
 var color_tween : Tween
+var scale_tween : Tween
+var shake_tween : Tween			# NEW
+var _base_pos   : Vector2		# NEW
 
 var mouse_inside : bool
 var _letter : String
@@ -136,10 +139,7 @@ func release_from_board():
 func placed_on_board():
 	print("placed on board")
 	set_state(TileState.PLACED_ON_BOARD)
-	
-func bzzt():
-	self_modulate = Color.RED
-	run_color_tween()
+
 
 func ding():
 	self_modulate = Color.GREEN
@@ -148,20 +148,68 @@ func ding():
 func lock_in():
 	set_state(TileState.LOCKED_IN)
 	
-func kill_tweens():
-	if color_tween:
-		color_tween.kill()
-
-func run_color_tween(length : float = 0.7, end_color : Color = Color.WHITE, wait : bool = false):
-	if color_tween:
-		color_tween.kill()
-	color_tween = create_tween()
-	color_tween.set_ease(Tween.EASE_IN)
-	color_tween.tween_property(self, "self_modulate", end_color, length)
-	if (wait):
-		await color_tween.finished
-	
+		
 func animate_score():
 	self.self_modulate = Color.GREEN
-	await run_color_tween(0.2, Color.GRAY, true)
+	run_scale_tween(0.1, Vector2.ONE, Vector2.ONE * 1.1, false)
+	await run_color_tween(0.1, Color.GRAY, true)
 	
+# ───────────────────────────── bzzt effect ─────────────────────────────
+func bzzt() -> void:
+	kill_tweens()						# stop any previous animations
+
+	self_modulate = Color.RED			# start with red flash
+	run_color_tween(0.25, Color.WHITE, false)	# fade back to white
+	run_scale_tween(0.1, Vector2.ONE, Vector2.ONE * 1.2, false)	# pop scale
+	run_shake_tween(0.18, 12.0, false)		# brief jitter
+# ───────────────────────────────────────────────────────────────────────
+
+# ─────────────────────── generic tween helpers ────────────────────────
+func run_color_tween(length : float = 0.7, end_color : Color = Color.WHITE, wait : bool = false) -> void:
+	if color_tween: color_tween.kill()
+	color_tween = create_tween()
+	color_tween.tween_property(self, "self_modulate", end_color, length) \
+		.set_ease(Tween.EASE_IN)
+	if wait: await color_tween.finished
+
+func run_scale_tween(length : float = 0.7, start_scale : Vector2 = Vector2.ONE, end_scale : Vector2 = Vector2.ONE, wait : bool = false) -> void:
+	if scale_tween: scale_tween.kill()
+	scale_tween = create_tween()
+	self.scale = start_scale
+	scale_tween.tween_property(self, "scale", end_scale, length) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	scale_tween.tween_property(self, "scale", start_scale, length) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	if wait: await scale_tween.finished
+
+# NEW: random positional shake
+func run_shake_tween(duration : float = 0.18, amplitude : float = 12.0, wait : bool = false) -> void:
+	if shake_tween: shake_tween.kill()
+	_base_pos = position
+	shake_tween = create_tween()
+	shake_tween.set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+
+	# drive _apply_shake each frame while amplitude → 0
+	shake_tween.tween_method(Callable(self, "_apply_shake"), amplitude, 0.0, duration) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	# restore exact start position when done
+	shake_tween.tween_callback(Callable(self, "_reset_position"))
+	if wait: await shake_tween.finished
+
+func _apply_shake(strength : float) -> void:
+	var offset := Vector2(
+		randf_range(-1.0, 1.0),
+		randf_range(-1.0, 1.0)
+	).normalized() * strength
+	position = _base_pos + offset
+
+func _reset_position() -> void:
+	position = _base_pos
+
+# ───────────────────────── misc maintenance ───────────────────────────
+func kill_tweens() -> void:
+	if color_tween: color_tween.kill()
+	if scale_tween: scale_tween.kill()
+	if shake_tween: shake_tween.kill()
+# ───────────────────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ class_name Board extends Node2D
 const board_size : Vector2i = Vector2i(7, 7)
 const slot_size : Vector2i = Vector2i(34, 34)
 @export var slot_scene : PackedScene
+var tooltip_showing : bool = false
 
 signal tile_scored(int)
 signal scoring_complete
@@ -11,6 +12,8 @@ signal scoring_complete
 signal slot_highlighted(Slot)
 signal slot_unhighlighted(Slot)
 
+
+var word_coords_dict : Dictionary = {}
 class SlotTileStruct:
 	var slot : Slot
 	var tile : GameTile
@@ -44,6 +47,7 @@ func _ready() -> void:
 			slot.coordinates = Vector2i(x, y)
 			board_state[y][x] = SlotTileStruct.new(slot)
 			slot.highlighted.connect(_slot_highlighted)
+			slot.unhighlighted.connect(_slot_unhighlighted)
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_0:
@@ -56,12 +60,9 @@ func validate_board() -> bool:
 
 	# ---------- dictionary errors ----------
 	if illegal_tiles.size() > 0:
-		for p in illegal_tiles:
+		for p in illegal_tiles + legal_tiles:
 			if !board_state_placed_status[p.y][p.x]:
 				board_state[p.y][p.x].tile.bzzt()
-		for p in legal_tiles:
-			if !board_state_placed_status[p.y][p.x]:
-				board_state[p.y][p.x].tile.ding()
 		return false
 
 	# ---------- positional rules ----------
@@ -173,10 +174,17 @@ func debug_print_board():
 
 func _slot_highlighted(slot : Slot):
 	slot_highlighted.emit(slot)
+	if slot.empty():
+		return
+	else:
+		var words = word_coords_dict.get(slot.coordinates)
+		if !words or words.size() == 0: return
+		show_tooltip(words)
 
 
 func _slot_unhighlighted(slot : Slot):
 	slot_unhighlighted.emit(slot)
+	hide_tooltip()
 
 func get_non_locked_tile_positions():
 	var result : Array[Vector2i] = []
@@ -198,6 +206,14 @@ func score_current_turn() -> int:
 	var words : Array = _collect_words(new_tiles)
 	if words.is_empty():
 		return 0
+		
+	var turn_map = build_tile_word_map(words)
+	# ⭐ merge into the master map instead of overwriting it
+	for pos in turn_map.keys():
+		if word_coords_dict.has(pos):
+			word_coords_dict[pos].append_array(turn_map[pos])
+		else:
+			word_coords_dict[pos] = turn_map[pos]
 		
 	# -------- lock tiles after successful move --------
 	for p in new_tiles:
@@ -308,35 +324,78 @@ func _move_touches_board(new_tiles : Array[Vector2i]) -> bool:
 				return true   # touches an existing locked tile
 	return false
 	
-func _tiles_form_single_line(tiles : Array[Vector2i]) -> bool:
-	# 0-or-1 tile → trivially OK (single-letter play or first move)
-	if tiles.size() <= 1:
+func _tiles_form_single_line(new_tiles : Array[Vector2i]) -> bool:
+	# no new tiles ⇒ not a legal move
+	if new_tiles.is_empty():
+		return false
+
+	# one tile is always OK (single-letter play or first move)
+	if new_tiles.size() == 1:
 		return true
 
-	var same_row := true
-	var same_col := true
-	var y0 := tiles[0].y
-	var x0 := tiles[0].x
+	# ── are they all in the same row or the same column? ─────────────
+	var row_same := true
+	var col_same := true
+	var row0 := new_tiles[0].y
+	var col0 := new_tiles[0].x
 
-	for p in tiles:
-		if p.y != y0:
-			same_row = false
-		if p.x != x0:
-			same_col = false
+	for p in new_tiles:
+		if p.y != row0: row_same = false
+		if p.x != col0: col_same = false
 
-	if not (same_row or same_col):
-		return false			# not all in one row or one column
+	if not (row_same or col_same):
+		return false                # L-shape / scattered
 
-	# -------- ensure no gaps --------
-	if same_row:
-		tiles.sort_custom(func(a,b): return a.x < b.x)
-		for i in range(tiles.size() - 1):
-			if tiles[i+1].x != tiles[i].x + 1:
-				return false
-	else: # same_col
-		tiles.sort_custom(func(a,b): return a.y < b.y)
-		for i in range(tiles.size() - 1):
-			if tiles[i+1].y != tiles[i].y + 1:
+	# ── walk from min→max and require every square to be filled ──────
+	if row_same:
+		var xs : Array[int] = []
+		for p in new_tiles: xs.append(p.x)
+		xs.sort()
+		for x in range(xs[0], xs[-1] + 1):
+			if board_state_text[row0][x] == "":
+				return false        # real gap
+	else: # col_same
+		var ys : Array[int] = []
+		for p in new_tiles: ys.append(p.y)
+		ys.sort()
+		for y in range(ys[0], ys[-1] + 1):
+			if board_state_text[y][col0] == "":
 				return false
 
 	return true
+	
+# ------------------------------------------------------------------
+#  returns a Dictionary whose keys are Vector2i board positions
+#  and whose values are *arrays of all words that pass through
+#  that square* (includes both new and pre-existing words). 
+# ------------------------------------------------------------------
+func build_tile_word_map(words : Array) -> Dictionary:
+	var m : Dictionary = {}        # Vector2i → Array[String]
+
+	for w in words:
+		var text  : String             = w["text"]
+		var tiles : Array[Vector2i]    = w["tiles"]
+
+		for pos in tiles:
+			if not m.has(pos):
+				m[pos] = []
+			m[pos].append(text)
+
+	return m
+
+func show_tooltip(words):
+	
+	var tooltip_text : String = ""
+	for word in words:
+		var defgetter : DefinitionGetter = DefinitionGetter.new()
+		defgetter.word_to_check = word
+		self.add_child(defgetter)
+		var def = await defgetter.definition_ready
+		tooltip_text += "%s: %s\n\n" % [word, def]
+	
+	$TooltipPanel/RichTextLabel.text = tooltip_text
+	$TooltipPanel.show()
+	
+func hide_tooltip():
+	print("hiding!")
+	$TooltipPanel.hide()

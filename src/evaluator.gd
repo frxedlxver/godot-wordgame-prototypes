@@ -32,26 +32,21 @@ static func evaluate_board(board : Array[Array]):
 		if info["word"].length() >= MIN_WORD_LEN and WORD_CHECKER.check_for_word(info["word"]):
 			add_to_legal_cover.call(info["coords"])
 
-	# ── 3. collect bad words and their *exclusive* tiles ──────────────
+	# ── 3. collect *every* invalid word and all of its tiles ─────────
 	var bad_words    : Array[String]   = []
 	var illegal_tiles: Array[Vector2i] = []
 
-	var push_tiles_if_exclusive = func(info):
-		var push = false
-		if info["word"].length() >= MIN_WORD_LEN and not WORD_CHECKER.check_for_word(info["word"]):
+	var push_if_invalid = func(info):
+		if info["word"].length() >= MIN_WORD_LEN \
+		   and not WORD_CHECKER.check_for_word(info["word"]):
 			bad_words.append(info["word"])
-			push = true
-		if push:
 			for p in info["coords"]:
-				if not legal_cover[p.y][p.x]:	# skip shared letters (e.g. the “I”)
-					illegal_tiles.append(p)
-
+				illegal_tiles.append(p)			# add all letters (shared or not)
 
 	for info in h_infos:
-		push_tiles_if_exclusive.call(info)
+		push_if_invalid.call(info)
 	for info in v_infos:
-		push_tiles_if_exclusive.call(info)
-
+		push_if_invalid.call(info)
 	# ── 4. add orphan tiles (not in *any* ≥2-letter run) ──────────────
 	for y in range(board_size.y):
 		for x in range(board_size.x):
