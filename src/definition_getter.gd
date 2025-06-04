@@ -15,6 +15,7 @@ func _ready() -> void:
 func _on_request_completed(result, _response_code, _headers, body):
 	if result == HTTPRequest.RESULT_SUCCESS:
 		var json = JSON.parse_string(body.get_string_from_utf8())
+		if !json: return
 		if json is Dictionary and json.get("title") == "No Definitions Found":
 			definition_ready.emit("No definition found")
 		else:
