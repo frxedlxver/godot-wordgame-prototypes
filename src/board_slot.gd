@@ -11,7 +11,7 @@ func _ready() -> void:
 	$Area2D.mouse_exited.connect(_area2d_mouse_exited)
 	
 func _area2d_mouse_entered():
-	self_modulate = Color8(255, 50, 50, 100);
+	self_modulate = Color8(200, 200, 200, 255);
 	highlighted.emit(self)
 	
 func _area2d_mouse_exited():
