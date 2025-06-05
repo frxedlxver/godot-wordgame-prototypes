@@ -3,5 +3,5 @@
 [ext_resource type="StyleBox" uid="uid://c7iwya6854te2" path="res://styles/tooltip_stylebox.tres" id="1_0kpxh"]
 
 [resource]
-Tooltip/base_type = &"Panel"
-Tooltip/styles/panel = ExtResource("1_0kpxh")
+DefinitionPanel/base_type = &"Panel"
+DefinitionPanel/styles/panel = ExtResource("1_0kpxh")

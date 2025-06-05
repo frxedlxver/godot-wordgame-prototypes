@@ -22,10 +22,3 @@ collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_e7f8u")
-
-[node name="TextEdit" type="TextEdit" parent="."]
-offset_left = -251.0
-offset_top = -34.0
-offset_right = -197.0
-offset_bottom = 18.0
-theme_override_font_sizes/font_size = 25

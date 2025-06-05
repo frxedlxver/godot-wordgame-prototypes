@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnn8qx884e7c2"]
+
+[ext_resource type="Theme" uid="uid://dvrrkdj1rv0l6" path="res://styles/main_theme.tres" id="1_4lef2"]
+[ext_resource type="Script" path="res://src/definition_panel.gd" id="2_xbixt"]
+
+[node name="DefinitionPanel" type="PanelContainer"]
+offset_right = 126.0
+offset_bottom = 62.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_4lef2")
+theme_type_variation = &"DefinitionPanel"
+script = ExtResource("2_xbixt")
+
+[node name="Definitions" type="VBoxContainer" parent="."]
+layout_mode = 2

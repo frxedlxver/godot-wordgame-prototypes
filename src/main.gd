@@ -31,7 +31,10 @@ func play_tiles():
 	if can_play:
 		await board.play()
 		while hand.tile_count() < max_hand_size:
-			hand.add_to_hand(bag.draw_tile())
+			var tile = bag.draw_tile()
+			
+			hand.add_to_hand(tile, $Bag.global_position)
+			await get_tree().create_timer(0.1).timeout
 			
 
 func on_tile_scored(new_score : int):

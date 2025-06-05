@@ -28,5 +28,5 @@ func draw_tile():
 
 func update_tile_count():
 	print(game_tiles.size())
-	$TextEdit.text = str(game_tiles.size())
+	$TextureRect/Label.text = str(game_tiles.size())
 	

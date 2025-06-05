@@ -1,13 +1,20 @@
-[gd_scene load_steps=10 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=13 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="2_qxoxs"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="3_0e3vv"]
-[ext_resource type="PackedScene" uid="uid://bnn8qx884e7c2" path="res://styles/tooltip.tscn" id="3_vomhx"]
+[ext_resource type="PackedScene" uid="uid://bnn8qx884e7c2" path="res://scenes/definition_panel.tscn" id="3_vomhx"]
 [ext_resource type="Script" path="res://src/deck_node.gd" id="4_4et1b"]
 [ext_resource type="Script" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
+[ext_resource type="Texture2D" uid="uid://tt0d14btpxdg" path="res://sprites/bag.png" id="6_wlugu"]
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://fonts/Minecraft.ttf" id="7_vc4r8"]
 [ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_lku3e"]
+font = ExtResource("7_vc4r8")
+outline_size = 10
+outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="GDScript" id="GDScript_24kty"]
 script/source = "class_name TileHandler extends Node2D
@@ -23,40 +30,46 @@ bag = NodePath("Bag")
 board = NodePath("Board")
 
 [node name="Board" parent="." instance=ExtResource("2_qxoxs")]
+position = Vector2(480, 230)
 
-[node name="DefinitionText" type="RichTextLabel" parent="Board"]
-offset_left = -249.0
-offset_top = 74.0
-offset_right = -98.0
-offset_bottom = 114.0
-theme_override_font_sizes/normal_font_size = 12
-
-[node name="TooltipPanel" parent="Board" instance=ExtResource("3_vomhx")]
+[node name="DefinitionPanel" parent="Board" instance=ExtResource("3_vomhx")]
 z_index = 1000
-offset_left = -256.0
-offset_top = -27.0
-offset_right = -52.0
-offset_bottom = 324.0
+offset_left = -238.0
+offset_top = -134.0
+offset_right = -34.0
+offset_bottom = 217.0
 
 [node name="Hand" parent="." instance=ExtResource("3_0e3vv")]
-position = Vector2(380, 336)
+position = Vector2(480, 480)
 
 [node name="Bag" type="Node2D" parent="."]
+position = Vector2(702, 478)
 script = ExtResource("4_4et1b")
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Bag"]
-offset_left = 6.0
-offset_top = 255.0
-offset_right = 126.0
-offset_bottom = 295.0
-text = "Tiles in bag:"
+[node name="TextureRect" type="TextureRect" parent="Bag"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -20.0
+offset_right = 32.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_wlugu")
 
-[node name="TextEdit" type="TextEdit" parent="Bag"]
-offset_left = 13.0
-offset_top = 278.0
-offset_right = 91.0
-offset_bottom = 347.0
-theme_override_font_sizes/font_size = 25
+[node name="Label" type="Label" parent="Bag/TextureRect"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 12.0
+offset_right = 64.0
+offset_bottom = 35.0
+text = "0"
+label_settings = SubResource("LabelSettings_lku3e")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TileHandler" type="Node2D" parent="."]
 script = SubResource("GDScript_24kty")
@@ -67,7 +80,7 @@ offset_top = -1.0
 offset_right = 152.0
 offset_bottom = 56.0
 theme_override_font_sizes/normal_font_size = 30
-text = "Score: 0"
+text = "Total: 0"
 
 [node name="TurnScore" type="RichTextLabel" parent="."]
 offset_left = 1.0
@@ -75,7 +88,7 @@ offset_top = 45.0
 offset_right = 152.0
 offset_bottom = 102.0
 theme_override_font_sizes/normal_font_size = 30
-text = "Score: 0"
+text = "Turn: 0"
 
 [node name="AudioStreamManager" type="Node" parent="."]
 script = ExtResource("6_vu4vo")

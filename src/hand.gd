@@ -26,12 +26,13 @@ func _process(delta: float) -> void:
 		want_reindex = false
 		reindex_tiles()
 		reorder_game_tiles()
-	$TextEdit.text = str(self.game_tiles.size())
 		
 
 
-func add_to_hand(game_tile : GameTile):
+func add_to_hand(game_tile : GameTile, starting_position = null):
 	self.add_child(game_tile)
+	if starting_position and starting_position is Vector2:
+		game_tile.global_position = starting_position
 	self.game_tiles.append(game_tile)
 	reorder_game_tiles()
 	game_tile.grabbed.connect(_tile_grabbed)
@@ -52,25 +53,23 @@ func reindex_tiles():
 	)
 
 func reorder_game_tiles() -> void:
-	var count := game_tiles.size()
+	_dedupe_and_prune_tiles()          # <- add this line
+
+	var count = game_tiles.size()
 	game_tile_target_positions = []
 	if count == 0:
 		return
 
-	# centre-to-centre spacing, but never wider than the bar
-	var sep : int = min(TILE_MAX_SEP, MAX_HAND_WIDTH / count)
-
-	# distance between first and last tile centres
-	var span : int = (count - 1) * sep
-
-	# x of the first tile centre so the strip is centred on the node’s origin (0,0)
-	var start_x : int = -span * 0.5
+	var sep = min(TILE_MAX_SEP, MAX_HAND_WIDTH / count)
+	var span = (count - 1) * sep
+	var start_x = -span * 0.5
 
 	for i in count:
 		var pos = Vector2(start_x + i * sep, 0)
 		game_tile_target_positions.append(pos)
-	
+
 	tween_tiles()
+
 
 func tween_tiles():
 	for i in game_tiles.size():
@@ -81,21 +80,17 @@ func tween_tiles():
 			tw.tween_property(tile, "position", pos, 0.2)
 			tw.set_ease(Tween.EASE_OUT)
 
-func _area2d_area_exited(area):
-	var area_owner = area.get_parent()
-	if area_owner is GameTile:
-		print("gametile exited");
-		game_tiles.erase(area_owner)
-		want_reindex = true
-		
 func _area2d_area_entered(area):
-	var area_owner = area.get_parent()
-	print("%s entered hand" % area_owner.name)
-	if area_owner is GameTile and !game_tiles.has(area_owner):
-		print("gt entered")
-		game_tiles.append(area_owner)
+	var tile = area.get_parent()
+	if tile is GameTile and not game_tiles.has(tile):
+		game_tiles.append(tile)
 		want_reindex = true
 
+func _area2d_area_exited(area):
+	var tile = area.get_parent()
+	if tile is GameTile:
+		game_tiles.erase(tile)
+		want_reindex = true
 		
 func _tile_grabbed(gametile : GameTile):
 	grabbed_tile = gametile
@@ -140,3 +135,12 @@ func get_highlighted_slot():
 		
 func tile_count():
 	return game_tiles.size()
+
+func _dedupe_and_prune_tiles() -> void:
+	var unique : Array[GameTile] = []
+	for t in game_tiles:
+		if t == null:
+			continue
+		if not unique.has(t):
+			unique.append(t)
+	game_tiles = unique

@@ -1,10 +1,12 @@
 class_name Board extends Node2D
 
 @onready var round_manager : RoundManager = get_parent()
-const board_size : Vector2i = Vector2i(9, 9)
+const board_size : Vector2i = Vector2i(11, 11)
 const slot_size : Vector2i = Vector2i(34, 34)
+const HALF_INDICES : Vector2i = (board_size - Vector2i.ONE) / 2
 @export var slot_scene : PackedScene
-var tooltip_showing : bool = false
+var definition_panel_showing : bool = false
+var _word_defs : Dictionary = {}	# "APPLE" → Definition
 
 signal tile_scored(int)
 signal scoring_complete
@@ -24,11 +26,70 @@ class SlotTileStruct:
 
 var board_state : Array[Array] = []
 var board_state_text : Array[Array] = []
+var show_defs_held : bool
+# tabs for indentation
+var _hover_coord : Vector2i = Vector2i(-1, -1)   # -1,-1 means “none”
+
+const TILE_MASK		:= CollisionLayers.TILE	# your enum / bit
 
 #tracks whether tile is a part of a previous play, or just placed
 var board_state_placed_status : Array[Array] = []
 
+func _process(_delta: float) -> void:
+	if not show_defs_held:
+		return
 
+	var coord = _get_coord_under_mouse()          # Vector2i or null
+	_update_definition_panel(coord)
+
+
+# ───────── 4.  helpers ────────────────────────────────────────────
+
+func _get_coord_under_mouse() -> Variant:           # Vector2i | null
+	var local := to_local(get_viewport().get_mouse_position())
+
+	# undo the centre-offset so 0,0 ... 10,10 map correctly
+	var rel := (local / Vector2(slot_size)) + Vector2(HALF_INDICES)
+
+	var cell := Vector2i(
+		int(round(rel.x)),
+		int(round(rel.y))
+	)
+
+	if	cell.x < 0 or cell.x >= board_size.x \
+	or	cell.y < 0 or cell.y >= board_size.y:
+		return null
+
+	return cell
+
+
+# ---- _update_definition_panel ------------------------------------
+func _update_definition_panel(coord : Variant) -> void:
+	if coord == _hover_coord:
+		return                          # nothing changed
+	
+	if coord == null:
+		_hover_coord = Vector2i(-1, -1)
+
+	clear_definitions()                # always start clean
+
+	if coord == null:
+		return                         # outside board: panel stays empty
+
+	var words : Array = word_coords_dict.get(coord, [])
+	if words.is_empty():
+		return                         # square has no words
+
+	# unique filter + cached defs
+	var seen : Dictionary = {}
+	for w in words:
+		if seen.has(w): continue
+		seen[w] = true
+		if _word_defs.has(w):
+			$DefinitionPanel.add_def(_word_defs[w])
+
+func clear_definitions():
+	$DefinitionPanel.clear()
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	for y in board_size.y:
@@ -39,19 +100,29 @@ func _ready() -> void:
 			board_state_placed_status[y].append(false)
 			board_state[y].append('')
 			board_state_text[y].append('')
-			var slot_pos = Vector2i(x, y) * slot_size
+
+			# ── new, centred position ───────────────────────────────
+			var slot_pos := (Vector2i(x, y) - HALF_INDICES) * slot_size
 			var slot : Node2D = slot_scene.instantiate()
-			self.add_child(slot)
-			slot.name = "slot_%d-%d" % [x, y]
-			slot.position = slot_pos
+			add_child(slot)
+			slot.name        = "slot_%d-%d" % [x, y]
+			slot.position    = slot_pos
 			slot.coordinates = Vector2i(x, y)
+
 			board_state[y][x] = SlotTileStruct.new(slot)
 			slot.highlighted.connect(_slot_highlighted)
 			slot.unhighlighted.connect(_slot_unhighlighted)
 
+
 func _input(event):
-	if event is InputEventKey and event.is_pressed() and event.keycode == KEY_0:
-		validate_board()
+	if event.is_action_pressed("show_defs"):
+		show_defs_held = true
+		show_definition_panel()
+	elif event.is_action_released("show_defs"):
+		show_defs_held = false
+		_hover_coord = Vector2(-1, -1)
+		hide_definition_panel()
+		
 
 func validate_board() -> bool:
 	var tiles = Evaluator.evaluate_board(board_state_text)
@@ -175,17 +246,10 @@ func debug_print_board():
 
 func _slot_highlighted(slot : Slot):
 	slot_highlighted.emit(slot)
-	if slot.empty():
-		return
-	else:
-		var words = word_coords_dict.get(slot.coordinates)
-		if !words or words.size() == 0: return
-		show_tooltip(words)
 
 
 func _slot_unhighlighted(slot : Slot):
 	slot_unhighlighted.emit(slot)
-	hide_tooltip()
 
 func get_non_locked_tile_positions():
 	var result : Array[Vector2i] = []
@@ -209,7 +273,7 @@ func score_current_turn() -> int:
 		return 0
 		
 	var turn_map = build_tile_word_map(words)
-	# ⭐ merge into the master map instead of overwriting it
+	
 	for pos in turn_map.keys():
 		if word_coords_dict.has(pos):
 			word_coords_dict[pos].append_array(turn_map[pos])
@@ -224,6 +288,7 @@ func score_current_turn() -> int:
 	var turn_points := 0
 	var good_noise_pitch = 0.0
 	for word in words:
+		_cache_definition(word["text"])
 		turn_points += await _score_word(word, good_noise_pitch, turn_points)
 		good_noise_pitch += word["text"].length() * 0.04
 	AudioStreamManager.reset_good_pitch()
@@ -392,19 +457,21 @@ func build_tile_word_map(words : Array) -> Dictionary:
 
 	return m
 
-func show_tooltip(words):
+func show_definition_panel() -> void:
+
+	$DefinitionPanel.show()
 	
-	var tooltip_text : String = ""
-	for word in words:
-		var defgetter : DefinitionGetter = DefinitionGetter.new()
-		defgetter.word_to_check = word
-		self.add_child(defgetter)
-		var def = await defgetter.definition_ready
-		tooltip_text += "%s: %s\n\n" % [word, def]
-	
-	$TooltipPanel/RichTextLabel.text = tooltip_text
-	$TooltipPanel.show()
-	
-func hide_tooltip():
+func hide_definition_panel():
 	print("hiding!")
-	$TooltipPanel.hide()
+	$DefinitionPanel.hide()
+
+func _cache_definition(word : String) -> void:
+	if _word_defs.has(word):
+		return						# already cached
+	
+	var getter := DefinitionGetter.new()
+	getter.word_to_check = word
+	add_child(getter)				# let it run
+	var def : Definition = await getter.definition_ready
+	_word_defs[word] = def
+	getter.queue_free()
