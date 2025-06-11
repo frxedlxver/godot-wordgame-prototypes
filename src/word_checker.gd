@@ -16,10 +16,6 @@ func _ready() -> void:
 	
 	if debug_print:
 		print("took %d usec to create dict of size %d" % [final_time, dict.keys().size()])
-
-	check_for_word("hi")
-	check_for_word("oops")
-	check_for_word("plappa")
 	
 func check_for_word(word : String) -> bool:
 	if debug_print:

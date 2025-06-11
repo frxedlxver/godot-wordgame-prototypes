@@ -1,6 +1,5 @@
 class_name Hand extends Node2D
 
-@onready var round_manager : RoundManager = get_parent()
 var game_tiles : Array[GameTile]
 var grabbed_tile : GameTile
 var game_tile_target_positions : Array[Vector2]
@@ -110,7 +109,7 @@ func _tile_released(gametile : GameTile):
 	
 	var current_slot = get_highlighted_slot()
 	if current_slot:
-		round_manager.board.place_tile_at(gametile, current_slot)
+		tile_released.emit(gametile, current_slot)
 		gametile.placed_on_board()
 	else:
 		_tile_return_to_hand_requested(gametile)

@@ -33,27 +33,31 @@ var _letter : String
 var letter : String:
 	get: return _letter
 	set(new_letter): 
+		data.letter = new_letter
 		if new_letter.length() != 1:
 			return
 		else:
 			_letter = new_letter.to_upper()
-			$Letter.texture = LettersNumbers.get_letter_image(letter)
+			$Letter.texture = LettersNumbers.get_letter_image(_letter)
 			
 var _score : int
 var score : int:
 	get: return _score
-	set(v):
-		_score = v
-		var ones = score % 10
+	set(new_score):
+		_score = new_score
+		data.score = new_score
+		var ones = _score % 10
 		$Letter/scoretab/NumberOnes.texture = LettersNumbers.get_small_number_image(ones)
-		if score >= 10:
-			var tens = score / 10
+		if _score >= 10:
+			var tens = _score / 10
 			$Letter/scoretab/NumberTens.texture = LettersNumbers.get_small_number_image(tens)
 			$Letter/scoretab/NumberTens.offset = Vector2i(-2, 0)
 			$Letter/scoretab/NumberOnes.offset = Vector2i(2, 0)
 		else:
 			$Letter/scoretab/NumberOnes.offset = Vector2i.ZERO
 			$Letter/scoretab/NumberTens.texture = null
+
+var data : GameTileData
 
 func _ready():
 	$Area2D.input_event.connect(_area2d_input_event)

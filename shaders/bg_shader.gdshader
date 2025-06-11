@@ -5,6 +5,7 @@ uniform vec3 color_a : source_color = vec3(0.06, 0.15, 0.50);   // deep blue
 uniform vec3 color_b : source_color = vec3(0.90, 0.55, 0.15);   // orange
 uniform vec3 color_c : source_color = vec3(0.98, 0.90, 0.80);   // pale highlight
 uniform float palette_mix : hint_range(0.0,1.0,0.01) = 0.5;   // blend-curve bias
+uniform int quantize_steps : hint_range(0, 256, 1) = 8;
 
 /* ───────── Pattern tuning ───────── */
 uniform float zoom         : hint_range(0.05, 4.0, 0.01) = 1.2;
@@ -65,6 +66,13 @@ vec2 warp(vec2 uv){
 	return center + d;
 }
 
+vec4 quantize(vec4 color, int steps) {
+	float s = float(steps - 1);
+	color.rgb = floor(color.rgb * s + 0.5)   // round to nearest bucket
+          / s;                       // bring back to 0-1 range
+	return color;
+}
+
 void fragment(){
 	/* pixel-to-UV with viewport-size independence */
 	vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE;      // 0-1
@@ -78,5 +86,5 @@ void fragment(){
 	vec3 col = palette(n);
 	float a   = pow(n, alpha_pow);
 
-	COLOR = vec4(col, a);
+	COLOR = quantize(vec4(col, a), quantize_steps);
 }

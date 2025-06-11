@@ -1,6 +1,5 @@
 class_name Board extends Node2D
 
-@onready var round_manager : RoundManager = get_parent()
 const board_size : Vector2i = Vector2i(11, 11)
 const slot_size : Vector2i = Vector2i(34, 34)
 const HALF_INDICES : Vector2i = (board_size - Vector2i.ONE) / 2

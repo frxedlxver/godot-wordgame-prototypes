@@ -1,21 +1,19 @@
 class_name Bag extends Node2D
 
-@onready var round_manager : RoundManager = get_parent()
 var game_tiles : Array[GameTile]
 
-
-
+signal tile_count_changed(int)
 
 func initialize():
 	for letter in LettersNumbers.STARTING_LETTERS.keys():
 		var amount = LettersNumbers.STARTING_LETTERS[letter]
 		for i in amount:
-			add_to_bag(GameTileFactory.create_tile(letter))
+			add_to_bag(GameTileFactory.create_tile_from_data(GameTileData.new()))
 	game_tiles.shuffle()
 
 func add_to_bag(game_tile : GameTile):
 	self.game_tiles.append(game_tile)
-	update_tile_count()
+	tile_count_changed.emit(game_tiles.size())
 	
 func shuffle():
 	game_tiles.shuffle()
@@ -23,10 +21,5 @@ func shuffle():
 func draw_tile():
 	if game_tiles.size() > 0:
 		var drawn_tile = game_tiles.pop_back()
-		update_tile_count()
+		tile_count_changed.emit(game_tiles.size())
 		return drawn_tile
-
-func update_tile_count():
-	print(game_tiles.size())
-	$TextureRect/Label.text = str(game_tiles.size())
-	
