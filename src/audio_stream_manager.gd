@@ -17,7 +17,6 @@ static func play_sound_effect(name : String, pitch_mod : float):
 		audio_stream.play()
 
 static func play_good_sound(pitch_mod : float = 0.0):
-	
 	var stream : AudioStreamPlayer = _instance.get_node("Good")
 	stream.pitch_scale = 1.0 + pitch_mod
 	stream.play()

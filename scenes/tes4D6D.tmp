@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=9 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
@@ -6,6 +6,7 @@
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
 [ext_resource type="Script" path="res://scenes/round_ui.gd" id="8_en4ah"]
 [ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
+[ext_resource type="PackedScene" uid="uid://bxqpqcgv16ilw" path="res://scenes/main_menu.tscn" id="8_ud4ub"]
 [ext_resource type="PackedScene" uid="uid://crpel47irxv8u" path="res://scenes/bag_ui.tscn" id="9_kjcc4"]
 
 [node name="Node2D" type="Node2D"]
@@ -72,3 +73,6 @@ offset_right = 64.0
 offset_bottom = 40.0
 grow_horizontal = 1
 grow_vertical = 1
+
+[node name="MainMenu" parent="UI" instance=ExtResource("8_ud4ub")]
+layout_mode = 1

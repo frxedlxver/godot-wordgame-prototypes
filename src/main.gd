@@ -4,10 +4,12 @@ var current_run_data : RunData = null
 var hand : Hand
 var bag : Bag
 var board : Board
+var main_menu : MainMenu
 
 var board_scene : PackedScene = preload("res://scenes/board.tscn")
 var hand_scene : PackedScene = preload("res://scenes/hand.tscn")
 var bag_scene : PackedScene = preload("res://scenes/bag.tscn")
+var main_menu_scene : PackedScene = preload("res://scenes/main_menu.tscn")
 
 @export var new_game_button : MainMenuButton
 @export var continue_button : MainMenuButton
@@ -29,21 +31,13 @@ func _ready() -> void:
 	pass
 
 func show_main_menu():
+	main_menu = main_menu_scene.instantiate()
+	$UI.add_child(main_menu)
+	main_menu.new_game_pressed.connect(start_new_run)
 	if has_saved_run:
-		continue_button.enable()
-		continue_button.pressed.connect(_on_continue_pressed())
+		main_menu.enable_continue()
 	else:
-		continue_button.disable()
-	settings_button.pressed.connect(_on_settings_pressed)
-	new_game_button.pressed.connect(_on_new_game_pressed)
-		
-
-func _on_new_game_pressed():
-	settings_button.slide_out()
-	continue_button.slide_out()
-	new_game_button.spin_to_oblivion()
-	await new_game_button.pressed_animation_finished
-	start_new_run();
+		main_menu.disable_continue()
 	
 func start_new_run():
 	current_run_data = RunData.new()
@@ -64,11 +58,7 @@ func start_new_run():
 	
 	bag.tile_count_changed.connect($"UI/Round UI".bag_count_updated)
 	bag.initialize()
-func _on_continue_pressed():
-	pass
-	
-func _on_settings_pressed():
-	pass
+
 	
 func initialize_round():
 	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot) 

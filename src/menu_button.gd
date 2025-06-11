@@ -21,17 +21,20 @@ func _on_pressed():
 	clicked = true
 	
 func slide_out():
+	self.set_process_input(false)
 	if hover_tween: hover_tween.kill()
 	hover_tween = create_tween()
 	var cur_pos = global_position
 	hover_tween.tween_property(self, "global_position", Vector2(cur_pos.x, 800), 0.3)
+	hover_tween.tween_interval(0.2)
 	await hover_tween.finished
 	self.queue_free()
 	
 func spin_to_oblivion():
+	self.set_process_input(false)
 	if hover_tween: hover_tween.kill()
 	hover_tween = create_tween()
-	hover_tween.tween_property(self, "scale", Vector2.ONE * 0.01, 0.6)
+	hover_tween.tween_property(self, "scale", Vector2.ONE * 0.01, 0.5)
 	hover_tween.set_ease(Tween.EASE_OUT)
 	var tw2 = create_tween()
 	tw2.tween_property(self, "rotation_degrees", 3600, 3.0)

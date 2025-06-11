@@ -1,0 +1,94 @@
+[gd_scene load_steps=4 format=3 uid="uid://bxqpqcgv16ilw"]
+
+[ext_resource type="Script" path="res://src/main_menu.gd" id="1_rxdep"]
+[ext_resource type="PackedScene" uid="uid://ck15ygb3lk4vv" path="res://scenes/main_menu_button.tscn" id="1_yr5ea"]
+[ext_resource type="LabelSettings" uid="uid://ds2vvbrnjbcj6" path="res://styles/button_label_settings.tres" id="2_exjof"]
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("new_game_button", "continue_button", "settings_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rxdep")
+new_game_button = NodePath("HBoxContainer/NewGame")
+continue_button = NodePath("HBoxContainer/Continue")
+settings_button = NodePath("HBoxContainer/Settings")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -196.0
+offset_top = 110.0
+offset_right = 196.0
+offset_bottom = 238.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NewGame" parent="HBoxContainer" instance=ExtResource("1_yr5ea")]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/NewGame"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -41.5
+offset_top = -11.5
+offset_right = 41.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "New Game"
+label_settings = ExtResource("2_exjof")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Continue" parent="HBoxContainer" instance=ExtResource("1_yr5ea")]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/Continue"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -41.5
+offset_top = -11.5
+offset_right = 41.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Continue"
+label_settings = ExtResource("2_exjof")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Settings" parent="HBoxContainer" instance=ExtResource("1_yr5ea")]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/Settings"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -41.5
+offset_top = -11.5
+offset_right = 41.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Settings"
+label_settings = ExtResource("2_exjof")
+horizontal_alignment = 1
+vertical_alignment = 1
