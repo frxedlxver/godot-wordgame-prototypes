@@ -1,112 +1,39 @@
 class_name Main extends Node2D
 
-var current_run_data : RunData = null
-var hand : Hand
-var bag : Bag
-var board : Board
-var main_menu : MainMenu
-@export var round_ui : RoundUI
 
-var board_scene : PackedScene = preload("res://scenes/board.tscn")
-var hand_scene : PackedScene = preload("res://scenes/hand.tscn")
-var bag_scene : PackedScene = preload("res://scenes/bag.tscn")
+var run_scene : PackedScene = preload("res://scenes/run.tscn")
+var round_scene : PackedScene = preload("res://scenes/round.tscn")
 var main_menu_scene : PackedScene = preload("res://scenes/main_menu.tscn")
+var current_run : Run
 
+var main_menu_node : MainMenu
 
-var total_score : int
-var turn_score : int
-var max_hand_size : int = 7
-
-var highlighted_board_slot : Slot
-var grabbed_tile : GameTile
 var has_saved_run : bool = false
 
 func _ready() -> void:
-	# later, first check for save data
-	# load save data if exists, create if not
-	# if save data has an active run, activate continue button
+	SAVE_MANAGER.load_data()
 	show_main_menu()
-	round_ui.hide()
 	pass
 
 func show_main_menu():
-	main_menu = main_menu_scene.instantiate()
-	$UI.add_child(main_menu)
-	main_menu.new_game_pressed.connect(start_new_run)
-	if has_saved_run:
-		main_menu.enable_continue()
+	main_menu_node = main_menu_scene.instantiate()
+	$UI.add_child(main_menu_node)
+	main_menu_node.new_game_pressed.connect(start_new_run)
+	if SAVE_MANAGER.has_saved_run():
+		main_menu_node.enable_continue()
 	else:
-		main_menu.disable_continue()
+		main_menu_node.disable_continue()
 	
 func start_new_run():
-	if main_menu:
+	if main_menu_node:
 		await get_tree().create_timer(0.5).timeout
-		main_menu.queue_free()
-	current_run_data = RunData.new()
-	
-	hand = hand_scene.instantiate()
-	board = board_scene.instantiate()
-	bag = bag_scene.instantiate()
-	
-	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot) 
-	board.slot_unhighlighted.connect(func(_slot): highlighted_board_slot = null)
-	board.tile_scored.connect(on_tile_scored)
-	board.scoring_complete.connect(on_scoring_complete)
-	hand.tile_placed.connect(on_tile_placed)
-	
-	self.add_child(hand)
-	self.add_child(board)
-	self.add_child(bag)
-	
-	var vp_size = get_viewport_rect().size
-	
-	var board_target_pos = Vector2(vp_size.x / 2, vp_size.y / 2)
-	board.global_position = Vector2(vp_size.x / 2, vp_size.y * -2)
-	var tw = create_tween()
-	tw.tween_property(board, "global_position", board_target_pos, 0.4)
-	
-	bag.tile_count_changed.connect(round_ui.bag_count_updated)
-	bag.initialize()
-	
-	while hand.tile_count() < 7 and not bag.is_empty():
-		hand.add_to_hand(bag.draw_tile())
-	round_ui.animate_in()
+		main_menu_node.queue_free()
 
-func on_tile_placed(tile : GameTile, slot : Slot):
-	board.place_tile_at(tile, slot)
-	
-func initialize_round():
-	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot) 
-	board.slot_unhighlighted.connect(func(_slot): highlighted_board_slot = null)
-	board.tile_scored.connect(on_tile_scored)
-	board.scoring_complete.connect(on_scoring_complete)
-	
-	bag.initialize()
-	for i in max_hand_size:
-		hand.add_to_hand(bag.draw_tile());
+	# reset and flag as in-progress
+	G.current_run_data.start_new_run()          # or RUN_DATA.reinitialize() + set fields
 
+	SAVE_MANAGER.save_data()          # ← RUN_DATA is valid now
 	
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("play"):
-		play_tiles()
-		
-func play_tiles():
-	var can_play = board.validate_board()
-	if can_play:
-		await board.play()
-		while hand.tile_count() < max_hand_size:
-			var tile = bag.draw_tile()
-			
-			hand.add_to_hand(tile, $Bag.global_position)
-			await get_tree().create_timer(0.1).timeout
-			
-
-func on_tile_scored(new_score : int):
-	turn_score = new_score
-	round_ui.update_turn_score(turn_score)
-
-func on_scoring_complete():
-	total_score += turn_score
-	round_ui.update_total_score(total_score)
-	turn_score = 0
-	round_ui.update_turn_score(turn_score)
+	current_run = run_scene.instantiate()
+	add_child(current_run)
+	current_run.initialize_fresh()

@@ -16,3 +16,16 @@ static func create_tile_from_data(gtd : GameTileData):
 static func duplicate_tile(tile : GameTile):
 	if tile != null:
 		return tile.instantiate()
+
+
+static func create_default_bag() -> Array[GameTileData]:
+	var result : Array[GameTileData] =  []
+	for letter in LettersNumbers.STARTING_LETTERS.keys():
+		var score = LettersNumbers.LETTER_SCORES[letter]
+		var count = LettersNumbers.STARTING_LETTERS[letter]
+		for i in count:
+			var gtd = GameTileData.new()
+			gtd.letter = letter
+			gtd.score = score
+			result.append(gtd)
+	return result

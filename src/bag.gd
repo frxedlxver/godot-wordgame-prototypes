@@ -4,13 +4,12 @@ var game_tiles : Array[GameTile]
 
 signal tile_count_changed(int)
 
-func initialize():
-	for letter in LettersNumbers.STARTING_LETTERS.keys():
-		var amount = LettersNumbers.STARTING_LETTERS[letter]
-		var score = LettersNumbers.LETTER_SCORES[letter]
-		for i in amount:
-			add_to_bag(GameTileFactory.create_tile_from_data(GameTileData.new(letter, score)))
-	game_tiles.shuffle()
+func initialize_from(bag_data : Array[GameTileData]):
+	for gtd in bag_data:
+		var tile = GameTileFactory.create_tile_from_data(gtd)
+		if tile and tile is GameTile:
+			add_to_bag(tile)
+	shuffle()
 
 func add_to_bag(game_tile : GameTile):
 	self.game_tiles.append(game_tile)

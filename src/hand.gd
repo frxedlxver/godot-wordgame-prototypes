@@ -136,10 +136,14 @@ func tile_count():
 	return game_tiles.size()
 
 func _dedupe_and_prune_tiles() -> void:
-	var unique : Array[GameTile] = []
+	var cleaned : Array[GameTile] = []
 	for t in game_tiles:
 		if t == null:
 			continue
-		if not unique.has(t):
-			unique.append(t)
-	game_tiles = unique
+		if not is_instance_valid(t):          # freed → skip
+			continue
+		if t.get_parent() != self:            # no longer a child → skip
+			continue
+		if not cleaned.has(t):                # de-dup
+			cleaned.append(t)
+	game_tiles = cleaned

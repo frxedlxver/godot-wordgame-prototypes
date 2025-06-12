@@ -17,7 +17,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+G="*res://src/game_state.gd"
 WORD_CHECKER="*res://src/word_checker.gd"
+SAVE_MANAGER="*res://src/save_manager.gd"
 
 [display]
 
