@@ -5,15 +5,13 @@ var hand : Hand
 var bag : Bag
 var board : Board
 var main_menu : MainMenu
+@export var round_ui : RoundUI
 
 var board_scene : PackedScene = preload("res://scenes/board.tscn")
 var hand_scene : PackedScene = preload("res://scenes/hand.tscn")
 var bag_scene : PackedScene = preload("res://scenes/bag.tscn")
 var main_menu_scene : PackedScene = preload("res://scenes/main_menu.tscn")
 
-@export var new_game_button : MainMenuButton
-@export var continue_button : MainMenuButton
-@export var settings_button : MainMenuButton
 
 var total_score : int
 var turn_score : int
@@ -28,6 +26,7 @@ func _ready() -> void:
 	# load save data if exists, create if not
 	# if save data has an active run, activate continue button
 	show_main_menu()
+	round_ui.hide()
 	pass
 
 func show_main_menu():
@@ -40,10 +39,20 @@ func show_main_menu():
 		main_menu.disable_continue()
 	
 func start_new_run():
+	if main_menu:
+		await get_tree().create_timer(0.5).timeout
+		main_menu.queue_free()
 	current_run_data = RunData.new()
+	
 	hand = hand_scene.instantiate()
 	board = board_scene.instantiate()
 	bag = bag_scene.instantiate()
+	
+	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot) 
+	board.slot_unhighlighted.connect(func(_slot): highlighted_board_slot = null)
+	board.tile_scored.connect(on_tile_scored)
+	board.scoring_complete.connect(on_scoring_complete)
+	hand.tile_placed.connect(on_tile_placed)
 	
 	self.add_child(hand)
 	self.add_child(board)
@@ -56,9 +65,15 @@ func start_new_run():
 	var tw = create_tween()
 	tw.tween_property(board, "global_position", board_target_pos, 0.4)
 	
-	bag.tile_count_changed.connect($"UI/Round UI".bag_count_updated)
+	bag.tile_count_changed.connect(round_ui.bag_count_updated)
 	bag.initialize()
+	
+	while hand.tile_count() < 7 and not bag.is_empty():
+		hand.add_to_hand(bag.draw_tile())
+	round_ui.animate_in()
 
+func on_tile_placed(tile : GameTile, slot : Slot):
+	board.place_tile_at(tile, slot)
 	
 func initialize_round():
 	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot) 
@@ -88,10 +103,10 @@ func play_tiles():
 
 func on_tile_scored(new_score : int):
 	turn_score = new_score
-	$TurnScore.text = "Turn: %d" % turn_score
+	round_ui.update_turn_score(turn_score)
 
 func on_scoring_complete():
 	total_score += turn_score
-	$TotalScore.text = "Total: %d" % total_score
+	round_ui.update_total_score(total_score)
 	turn_score = 0
-	$TurnScore.text = "Turn: %d" % turn_score
+	round_ui.update_turn_score(turn_score)

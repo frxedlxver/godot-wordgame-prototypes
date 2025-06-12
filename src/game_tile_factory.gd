@@ -8,9 +8,9 @@ static func create_tile_from_data(gtd : GameTileData):
 		return
 	else:
 		var tile_node = game_tile_scene.instantiate()
+		tile_node.data = gtd
 		tile_node.letter = gtd.letter
 		tile_node.score = gtd.score
-		tile_node.data = gtd
 		return tile_node
 
 static func duplicate_tile(tile : GameTile):

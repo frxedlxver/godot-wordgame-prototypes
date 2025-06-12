@@ -4,13 +4,14 @@
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
 [ext_resource type="Script" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
-[ext_resource type="Script" path="res://scenes/round_ui.gd" id="8_en4ah"]
+[ext_resource type="Script" path="res://src/round_ui.gd" id="8_en4ah"]
 [ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
 [ext_resource type="PackedScene" uid="uid://crpel47irxv8u" path="res://scenes/bag_ui.tscn" id="9_kjcc4"]
 
-[node name="Node2D" type="Node2D"]
+[node name="Node2D" type="Node2D" node_paths=PackedStringArray("round_ui")]
 position = Vector2(1, 0)
 script = ExtResource("1_kiayv")
+round_ui = NodePath("UI/Round UI")
 
 [node name="AudioStreamManager" type="Node" parent="."]
 script = ExtResource("6_vu4vo")
@@ -34,24 +35,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-
-[node name="TotalScore" type="RichTextLabel" parent="UI"]
-layout_mode = 0
-offset_left = 1.0
-offset_top = -1.0
-offset_right = 152.0
-offset_bottom = 56.0
-theme_override_font_sizes/normal_font_size = 30
-text = "Total: 0"
-
-[node name="TurnScore" type="RichTextLabel" parent="UI"]
-layout_mode = 0
-offset_left = 1.0
-offset_top = 45.0
-offset_right = 152.0
-offset_bottom = 102.0
-theme_override_font_sizes/normal_font_size = 30
-text = "Turn: 0"
+mouse_filter = 2
 
 [node name="Round UI" type="Control" parent="UI"]
 anchors_preset = 0
@@ -72,3 +56,21 @@ offset_right = 64.0
 offset_bottom = 40.0
 grow_horizontal = 1
 grow_vertical = 1
+
+[node name="TurnScore" type="RichTextLabel" parent="UI/Round UI"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 45.0
+offset_right = 152.0
+offset_bottom = 102.0
+theme_override_font_sizes/normal_font_size = 30
+text = "Turn: 0"
+
+[node name="TotalScore" type="RichTextLabel" parent="UI/Round UI"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = -1.0
+offset_right = 152.0
+offset_bottom = 56.0
+theme_override_font_sizes/normal_font_size = 30
+text = "Total: 0"

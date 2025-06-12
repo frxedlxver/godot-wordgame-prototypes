@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://imys0a2abki" path="res://scenes/slot.tscn" id="2_ur6n5"]
 
 [node name="Board" type="Node2D"]
+z_index = -1
 position = Vector2(261, 32)
 script = ExtResource("1_d21dy")
 slot_scene = ExtResource("2_ur6n5")

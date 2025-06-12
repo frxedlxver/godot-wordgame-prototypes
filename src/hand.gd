@@ -15,6 +15,7 @@ var grabbed_tile_prev_index = 0
 
 signal tile_grabbed(GameTile)
 signal tile_released(GameTile)
+signal tile_placed(GameTile, Slot)
 
 func _ready() -> void:
 	$Area2D.area_exited.connect(_area2d_area_exited)
@@ -25,7 +26,6 @@ func _process(delta: float) -> void:
 		want_reindex = false
 		reindex_tiles()
 		reorder_game_tiles()
-		
 
 
 func add_to_hand(game_tile : GameTile, starting_position = null):
@@ -109,7 +109,7 @@ func _tile_released(gametile : GameTile):
 	
 	var current_slot = get_highlighted_slot()
 	if current_slot:
-		tile_released.emit(gametile, current_slot)
+		tile_placed.emit(gametile, current_slot)
 		gametile.placed_on_board()
 	else:
 		_tile_return_to_hand_requested(gametile)
