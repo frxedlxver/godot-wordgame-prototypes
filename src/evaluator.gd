@@ -1,7 +1,7 @@
 # tabs for indentation
 class_name Evaluator extends Node2D
 
-static var board_size : Vector2i = Board.board_size
+static var board_size : Vector2i = Board.BOARD_SIZE
 const MIN_WORD_LEN := 2
 
 static func evaluate_board(board : Array[Array]):

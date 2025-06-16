@@ -1,0 +1,90 @@
+[gd_scene load_steps=11 format=3 uid="uid://jb12j5p22epv"]
+
+[ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
+[ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
+[ext_resource type="Texture2D" uid="uid://bmeiqnjlotjph" path="res://sprites/runes/lalilulelo.png" id="6_1onud"]
+[ext_resource type="Script" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
+[ext_resource type="Script" path="res://src/runes/rune_node.gd" id="7_5m4ql"]
+[ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="Texture2D" uid="uid://bpl04ls8de8qf" path="res://sprites/runes/vowelpower.png" id="8_dvncj"]
+[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
+[ext_resource type="Texture2D" uid="uid://2kbj31hppqpf" path="res://sprites/runes/starpower.png" id="9_0tb78"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfxam"]
+size = Vector2(32, 32)
+
+[node name="Node2D" type="Node2D"]
+position = Vector2(1, 0)
+script = ExtResource("1_kiayv")
+
+[node name="AudioStreamManager" type="Node" parent="."]
+script = ExtResource("6_vu4vo")
+
+[node name="Bad" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("7_l8hsb")
+
+[node name="Good" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("8_io1cw")
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -100
+material = ExtResource("2_68p7e")
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 2
+
+[node name="UI" type="Control" parent="."]
+custom_minimum_size = Vector2(960, 540)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="UI"]
+layout_mode = 0
+offset_left = 302.0
+offset_top = 3.0
+offset_right = 625.0
+offset_bottom = 77.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Panel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="RuneNode2" type="TextureRect" parent="UI/Panel/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("6_1onud")
+stretch_mode = 4
+script = ExtResource("7_5m4ql")
+
+[node name="Area2D" type="Area2D" parent="UI/Panel/HBoxContainer/RuneNode2"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UI/Panel/HBoxContainer/RuneNode2/Area2D"]
+position = Vector2(16, 16)
+shape = SubResource("RectangleShape2D_hfxam")
+
+[node name="RuneNode3" type="TextureRect" parent="UI/Panel/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("8_dvncj")
+stretch_mode = 4
+script = ExtResource("7_5m4ql")
+
+[node name="Area2D" type="Area2D" parent="UI/Panel/HBoxContainer/RuneNode3"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UI/Panel/HBoxContainer/RuneNode3/Area2D"]
+position = Vector2(16, 16)
+shape = SubResource("RectangleShape2D_hfxam")
+
+[node name="RuneNode4" type="TextureRect" parent="UI/Panel/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("9_0tb78")
+stretch_mode = 4
+script = ExtResource("7_5m4ql")
+
+[node name="Area2D" type="Area2D" parent="UI/Panel/HBoxContainer/RuneNode4"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UI/Panel/HBoxContainer/RuneNode4/Area2D"]
+position = Vector2(16, 16)
+shape = SubResource("RectangleShape2D_hfxam")

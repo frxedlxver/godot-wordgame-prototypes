@@ -20,7 +20,12 @@ const LETTER_SCORES: Dictionary = {
 	"u": 4,	"v": 4, "w": 4, "x": 8, "y": 4, "z": 10
 }
 
-static func get_letter_image(letter : String):
+const VOWELS : Array[String] = ['a','e','i','o','u',]
+
+static func is_vowel(to_check : String):
+	return VOWELS.has(to_check.to_lower())
+
+static func get_letter_image(letter: String):
 	var path = "res://sprites/letters/%s.tres" % letter.to_upper()
 	return load(path)
 	

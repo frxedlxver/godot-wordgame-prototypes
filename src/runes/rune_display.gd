@@ -1,0 +1,1 @@
+class_name RuneDisplayArea extends Control

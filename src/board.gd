@@ -1,491 +1,211 @@
-class_name Board extends Node2D
+# tabs for indentation
+class_name Board
+extends Node2D
 
-const board_size : Vector2i = Vector2i(11, 11)
-const slot_size : Vector2i = Vector2i(34, 34)
-const HALF_INDICES : Vector2i = (board_size - Vector2i.ONE) / 2
+# ────────────────────────────── constants / exports ─────────────────────────
+const BOARD_SIZE  : Vector2i = Vector2i(9, 9)
+const SLOT_SIZE   : Vector2i = Vector2i(34, 34)
+const HALF_IDX    : Vector2i = (BOARD_SIZE - Vector2i.ONE) / 2
+
 @export var slot_scene : PackedScene
-var definition_panel_showing : bool = false
-var _word_defs : Dictionary = {}	# "APPLE" → Definition
 
-signal tile_scored(int)
-signal scoring_complete
-
+# ──────────────────────────── public signals (ui) ───────────────────────────
 signal slot_highlighted(Slot)
 signal slot_unhighlighted(Slot)
 
+# ───────────────────────── internal state (visual) ──────────────────────────
+var board_state            : Array[Array] = []	# SlotTileStruct grid
+var board_text             : Array[Array] = []	# String grid ("" = empty)
+var placed_mask            : Array[Array] = []	# Bool grid (true = locked)
+var word_coords_dict       : Dictionary   = {}	# hover panel cache
 
-var word_coords_dict : Dictionary = {}
+var show_defs_held : bool = false
+var _hover_coord   : Vector2i = Vector2i(-1, -1)
+
+var _word_defs : Dictionary = {}				# "APPLE" → Definition
+
+# ---------------------------------------------------------------------------
 class SlotTileStruct:
 	var slot : Slot
 	var tile : GameTile
-	
-	func _init(p_slot : Slot = null, p_tile : GameTile = null) -> void:
-		self.slot = p_slot
-		self.tile = p_tile
+	func _init(p_slot:Slot=null, p_tile:GameTile=null)->void:
+		slot = p_slot
+		tile = p_tile
 
-var board_state : Array[Array] = []
-var board_state_text : Array[Array] = []
-var show_defs_held : bool
-# tabs for indentation
-var _hover_coord : Vector2i = Vector2i(-1, -1)   # -1,-1 means “none”
+# ─────────────────────────────── lifecycle ──────────────────────────────────
+func _ready() -> void:
+	for y in BOARD_SIZE.y:
+		board_state.append([])
+		board_text.append([])
+		placed_mask.append([])
 
-const TILE_MASK		:= CollisionLayers.TILE	# your enum / bit
+		for x in BOARD_SIZE.x:
+			board_state[y].append(SlotTileStruct.new())
+			board_text [y].append("")
+			placed_mask[y].append(false)
 
-#tracks whether tile is a part of a previous play, or just placed
-var board_state_placed_status : Array[Array] = []
+			# spawn slot scene
+			var slot := slot_scene.instantiate() as Slot
+			add_child(slot)
+			slot.position    = (Vector2i(x, y) - HALF_IDX) * SLOT_SIZE
+			slot.coordinates = Vector2i(x, y)
+			board_state[y][x].slot = slot
 
-func _process(_delta: float) -> void:
-	if not show_defs_held:
-		return
+			slot.highlighted.connect(_slot_highlighted)
+			slot.unhighlighted.connect(_slot_unhighlighted)
 
-	var coord = _get_coord_under_mouse()          # Vector2i or null
-	_update_definition_panel(coord)
+func _process(_dt:float) -> void:
+	if show_defs_held:
+		var coord = _get_coord_under_mouse()
+		_update_definition_panel(coord)
+
+func _input(event) -> void:
+	if event.is_action_pressed("show_defs"):
+		show_defs_held = true
+		show_definition_panel()
+	elif event.is_action_released("show_defs"):
+		show_defs_held = false
+		_hover_coord = Vector2i(-1,-1)
+		hide_definition_panel()
+
+# ─────────────────────── public interface for Game Flow ─────────────────────
+func get_turn_snapshot() -> Dictionary:
+	var new_tiles := _get_current_turn_tiles()
+
+	# build a parallel grid of GameTile refs (or null)
+	var tiles_grid : Array = []
+	for y in BOARD_SIZE.y:
+		tiles_grid.append([])
+		for x in BOARD_SIZE.x:
+			tiles_grid[y].append(board_state[y][x].tile)   # GameTile or null
+
+	return {
+		"board_text"   : board_text,
+		"board_tiles"  : tiles_grid,
+		"placed_mask"  : placed_mask,
+		"new_tiles"    : new_tiles
+	}
+
+# NEW: lock the tiles that have just been accepted as part of the run
+func commit_turn(new_tiles:Array[Vector2i]) -> void:
+	for p : Vector2i in new_tiles:
+		placed_mask[p.y][p.x] = true
+		var tile = board_state[p.y][p.x].tile
+		if tile:
+			tile.lock_in()
+
+# ─────────────────────────── tile manipulation ──────────────────────────────
+func place_tile_at(tile:GameTile, target_slot:Slot) -> void:
+	var dest = board_state[target_slot.coordinates.y][target_slot.coordinates.x]
+	var displaced = dest.tile
+
+	tile.grabbed.connect(remove_tile)
+	tile.return_to_hand.connect(remove_tile)
 
 
-# ───────── 4.  helpers ────────────────────────────────────────────
+	var origin_slot : Slot = null
+	if tile.coordinates != -Vector2i.ONE:
+		origin_slot = board_state[tile.coordinates.y][tile.coordinates.x].slot
 
-func _get_coord_under_mouse() -> Variant:           # Vector2i | null
+	# handle displaced tile
+	if displaced and displaced != tile:
+		if origin_slot:
+			_snap_tile_to_slot(displaced, origin_slot)
+			displaced.coordinates = origin_slot.coordinates
+			board_state[origin_slot.coordinates.y][origin_slot.coordinates.x].tile = displaced
+			board_text [origin_slot.coordinates.y][origin_slot.coordinates.x] = displaced.letter
+		else:
+			displaced.release_from_board()
+
+	# claim destination
+	tile.coordinates = target_slot.coordinates
+	dest.tile         = tile
+	board_text[target_slot.coordinates.y][target_slot.coordinates.x] = tile.letter
+	_snap_tile_to_slot(tile, target_slot)
+
+func remove_tile(tile:GameTile) -> void:
+	if tile.grabbed.is_connected(remove_tile):
+		tile.grabbed.disconnect(remove_tile)
+	if tile.return_to_hand.is_connected(remove_tile):
+		tile.return_to_hand.disconnect(remove_tile)
+
+	var y := tile.coordinates.y
+	var x := tile.coordinates.x
+	if y >= 0 and x >= 0:
+		board_text[y][x]             = ""
+		board_state[y][x].tile       = null
+	if tile.state == GameTile.TileState.IDLE:
+		tile.coordinates = -Vector2.ONE
+	debug_print_board()
+
+func _snap_tile_to_slot(tile:GameTile, slot:Slot) -> void:
+	var tw := create_tween()
+	tw.tween_property(tile, "global_position", slot.global_position, 0.1)
+	tw.set_ease(Tween.EASE_IN)
+	tile.placed_on_board()
+
+# ───────────────────── hover-definition panel helpers ───────────────────────
+func _get_coord_under_mouse() -> Variant:
 	var local := to_local(get_viewport().get_mouse_position())
-
-	# undo the centre-offset so 0,0 ... 10,10 map correctly
-	var rel := (local / Vector2(slot_size)) + Vector2(HALF_INDICES)
-
-	var cell := Vector2i(
-		int(round(rel.x)),
-		int(round(rel.y))
-	)
-
-	if	cell.x < 0 or cell.x >= board_size.x \
-	or	cell.y < 0 or cell.y >= board_size.y:
+	var rel   := (local / Vector2(SLOT_SIZE)) + Vector2(HALF_IDX)
+	var cell  := Vector2i(int(round(rel.x)), int(round(rel.y)))
+	if	cell.x < 0 or cell.x >= BOARD_SIZE.x \
+	or	cell.y < 0 or cell.y >= BOARD_SIZE.y:
 		return null
-
 	return cell
 
-
-# ---- _update_definition_panel ------------------------------------
-func _update_definition_panel(coord : Variant) -> void:
+func _update_definition_panel(coord:Variant) -> void:
 	if coord == _hover_coord:
-		return                          # nothing changed
-	
+		return
 	if coord == null:
-		_hover_coord = Vector2i(-1, -1)
-
-	clear_definitions()                # always start clean
-
+		_hover_coord = Vector2i(-1,-1)
+	clear_definitions()
 	if coord == null:
-		return                         # outside board: panel stays empty
-
-	var words : Array = word_coords_dict.get(coord, [])
-	if words.is_empty():
-		return                         # square has no words
-
-	# unique filter + cached defs
-	var seen : Dictionary = {}
+		return
+	var words = word_coords_dict.get(coord, [])
+	var seen  : Dictionary = {}
 	for w in words:
 		if seen.has(w): continue
 		seen[w] = true
 		if _word_defs.has(w):
 			$DefinitionPanel.add_def(_word_defs[w])
 
-func clear_definitions():
-	$DefinitionPanel.clear()
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	for y in board_size.y:
-		board_state.append([])
-		board_state_text.append([])
-		board_state_placed_status.append([])
-		for x in board_size.x:
-			board_state_placed_status[y].append(false)
-			board_state[y].append('')
-			board_state_text[y].append('')
-
-			# ── new, centred position ───────────────────────────────
-			var slot_pos := (Vector2i(x, y) - HALF_INDICES) * slot_size
-			var slot : Node2D = slot_scene.instantiate()
-			add_child(slot)
-			slot.name        = "slot_%d-%d" % [x, y]
-			slot.position    = slot_pos
-			slot.coordinates = Vector2i(x, y)
-
-			board_state[y][x] = SlotTileStruct.new(slot)
-			slot.highlighted.connect(_slot_highlighted)
-			slot.unhighlighted.connect(_slot_unhighlighted)
-
-
-func _input(event):
-	if event.is_action_pressed("show_defs"):
-		show_defs_held = true
-		show_definition_panel()
-	elif event.is_action_released("show_defs"):
-		show_defs_held = false
-		_hover_coord = Vector2(-1, -1)
-		hide_definition_panel()
-		
-
-func validate_board() -> bool:
-	var tiles = Evaluator.evaluate_board(board_state_text)
-	var illegal_tiles = tiles["illegal"]
-	var legal_tiles   = tiles["legal"]
-
-	# ---------- dictionary errors ----------
-	if illegal_tiles.size() > 0:
-		for p in illegal_tiles + legal_tiles:
-			if !board_state_placed_status[p.y][p.x]:
-				board_state[p.y][p.x].tile.bzzt()
-		AudioStreamManager.play_bad_sound()
-		return false
-
-	# ---------- positional rules ----------
-	var new_tiles = get_non_locked_tile_positions()
-
-	if !_tiles_form_single_line(new_tiles):
-		for p in new_tiles: board_state[p.y][p.x].tile.bzzt()
-		return false
-
-	if !_move_touches_board(new_tiles):
-		for p in new_tiles: board_state[p.y][p.x].tile.bzzt()
-		return false
-
-	return true
-
-		
-func play():
-	await score_current_turn()
-	update_board_state_placed_status()
-	
-	scoring_complete.emit()
-
-func update_board_state_placed_status():
-	if board_state_placed_status.size() != board_state_text.size():
-		var row : Array[bool]
-		row.resize(board_size.x)
-		row.fill(false)
-		board_state_placed_status.resize(board_size.y)
-		board_state_placed_status.fill(row)
-		print(str(board_state_placed_status))
-	for y in board_state_text.size():
-		for x in board_state_text[y].size():
-			if board_state_text[y][x].length() > 0:
-				board_state_placed_status[y][x] = true
-				board_state[y][x].tile.lock_in()
-				board_state[y][x].slot.has_tile = true
-			else:
-				board_state_placed_status[y][x] = false
-			
-
-func place_tile_at(game_tile : GameTile, target_slot : Slot):
-	var target_cell : SlotTileStruct = board_state[target_slot.coordinates.y][target_slot.coordinates.x]
-	var displaced_tile : GameTile      = target_cell.tile                 # tile currently in the slot
-	
-	game_tile.grabbed.connect(remove_tile)
-	game_tile.return_to_hand.connect(remove_tile)
-	# -------- locate origin slot if the dragged tile was on the board --------
-	var origin_slot : Slot = null
-	if game_tile.coordinates != -Vector2i.ONE:
-		var origin_cell : SlotTileStruct = board_state[game_tile.coordinates.y][game_tile.coordinates.x]
-		origin_slot = origin_cell.slot
-
-	# --- handle displaced tile first ---
-	if displaced_tile and displaced_tile != game_tile:
-		if origin_slot:                                # swap path
-			_snap_tile_to_slot(displaced_tile, origin_slot)
-			displaced_tile.coordinates = origin_slot.coordinates
-			board_state[origin_slot.coordinates.y][origin_slot.coordinates.x].tile = displaced_tile
-			board_state_text[origin_slot.coordinates.y][origin_slot.coordinates.x] = displaced_tile.letter
-		else:                                          # came from hand → bump tile out
-			print("returning tile to hand")
-			displaced_tile.release_from_board()
-
-	# --- now claim the destination slot ---
-	game_tile.coordinates = target_slot.coordinates
-	target_cell.tile      = game_tile
-	board_state_text[target_slot.coordinates.y][target_slot.coordinates.x] = game_tile.letter
-	_snap_tile_to_slot(game_tile, target_slot)
-
-
-func _snap_tile_to_slot(game_tile : GameTile, slot : Slot):
-	var tw = create_tween()
-	tw.tween_property(game_tile, "global_position", slot.global_position, 0.1)
-	tw.set_ease(Tween.EASE_IN)
-	game_tile.placed_on_board()   # NEW
-
-func remove_tile(tile : GameTile):
-	# ── stop listening first ───────────────────────────────
-	if tile.grabbed.is_connected(remove_tile):
-		tile.grabbed.disconnect(remove_tile)
-	if tile.return_to_hand.is_connected(remove_tile):
-		tile.return_to_hand.disconnect(remove_tile)
-
-	# ── clear arrays while coordinates are still valid ────
-	var y := tile.coordinates.y
-	var x := tile.coordinates.x
-	if y >= 0 and x >= 0:
-		board_state_text[y][x] = ''
-		board_state[y][x].tile = null
-
-	# ── if the tile was actually returned to hand, clear coords ──
-	if tile.state == GameTile.TileState.IDLE:
-		tile.coordinates = -Vector2.ONE
-
-	debug_print_board()
-
-
-func debug_print_board():
-	var board_string = ''
-	for row in board_state_text:
-		for cell in row:
-			board_string += cell if cell != '' else '-'
-			board_string += ' '
-		board_string += '\n'
-	print(board_string)
-
-
-func _slot_highlighted(slot : Slot):
-	slot_highlighted.emit(slot)
-
-
-func _slot_unhighlighted(slot : Slot):
-	slot_unhighlighted.emit(slot)
-
-func get_non_locked_tile_positions():
-	var result : Array[Vector2i] = []
-	for y in board_state_text.size():
-		for x in board_state_text[y].size():
-			if board_state_text[y][x] and !board_state_placed_status[y][x]:
-				result.append(Vector2i(x, y))
-				
-	return result
-	
-# ------------------------------------------------------------------
-
-func score_current_turn() -> int:
-	var new_tiles : Array[Vector2i] = get_non_locked_tile_positions()
-	if new_tiles.is_empty():
-		return 0
-
-	# -------- gather all words formed this turn --------
-	var words : Array = _collect_words(new_tiles)
-	if words.is_empty():
-		return 0
-		
-	var turn_map = build_tile_word_map(words)
-	
-	for pos in turn_map.keys():
-		if word_coords_dict.has(pos):
-			word_coords_dict[pos].append_array(turn_map[pos])
-		else:
-			word_coords_dict[pos] = turn_map[pos]
-		
-	# -------- lock tiles after successful move --------
-	for p in new_tiles:
-		board_state_placed_status[p.y][p.x] = true
-		board_state[p.y][p.x].tile.lock_in()
-
-	var turn_points := 0
-	var good_noise_pitch = 0.0
-	for word in words:
-		_cache_definition(word["text"])
-		turn_points += await _score_word(word, good_noise_pitch, turn_points)
-		good_noise_pitch += word["text"].length() * 0.04
-	AudioStreamManager.reset_good_pitch()
-	
-
-
-
-	return turn_points
-
-
-# ===== helpers ====================================================
-
-func _collect_words(new_tiles : Array[Vector2i]) -> Array:
-	var seen := {}           # avoid duplicates
-	var words : Array = []
-
-	for p in new_tiles:
-		# horizontal (scan left + right)
-		var w = _scan_from(p, Vector2i(-1,0)) \
-			   + board_state_text[p.y][p.x] \
-			   + _scan_from(p, Vector2i(1,0))
-		if w.length() >= 2 and not seen.has(w):
-			words.append({ "text": w, "tiles": _tiles_of_word(p, Vector2i(1,0)) })
-			seen[w] = true
-
-		# vertical (scan up + down)
-		w = _scan_from(p, Vector2i(0,-1)) \
-			+ board_state_text[p.y][p.x] \
-			+ _scan_from(p, Vector2i(0,1))
-		if w.length() >= 2 and not seen.has(w):
-			words.append({ "text": w, "tiles": _tiles_of_word(p, Vector2i(0,1)) })
-			seen[w] = true
-
-	return words
-
-
-func _scan_from(start : Vector2i, dir : Vector2i) -> String:
-	var s := ""
-	var cur := start + dir
-	while cur.x >= 0 and cur.x < board_size.x and cur.y >= 0 and cur.y < board_size.y:
-		var ch = board_state_text[cur.y][cur.x]
-		if ch == "":
-			break
-		s     =  ch + s if dir.x + dir.y < 0 else s + ch   # prepend if scanning left/up
-		cur  += dir
-	return s
-
-
-func _tiles_of_word(start : Vector2i, step : Vector2i) -> Array[Vector2i]:
-	# assumes word is contiguous; walk left/up to find beginning
-	var begin := start
-	while true:
-		var nxt := begin - step
-		if nxt.x < 0 or nxt.x >= board_size.x or nxt.y < 0 or nxt.y >= board_size.y:
-			break
-		if board_state_text[nxt.y][nxt.x] == "":
-			break
-		begin = nxt
-
-	var coords : Array[Vector2i] = []
-	var cur := begin
-	while cur.x < board_size.x and cur.y < board_size.y \
-		  and board_state_text[cur.y][cur.x] != "":
-		coords.append(cur)
-		cur += step
-	return coords
-
-
-func _score_word(info : Dictionary, starting_pitch : float, word_pts : int) -> int:
-	var tiles : Array = info["tiles"]
-	var word_mult := 1
-	var letter_pts := 0
-	var ctx = {
-		"word" : info["text"],
-		"tile" : null,
-		"letter_index" : 0
-	}
-
-	var pitch_mod = starting_pitch
-	var pitch_mod_increase = 0.04
-	var letter_index = 0
-	for pos in tiles:
-		letter_index += 1
-		var tile = board_state[pos.y][pos.x].tile
-		var letter_score = tile.score
-		
-		letter_pts += letter_score
-		tile_scored.emit(letter_pts + word_pts)
-		AudioStreamManager.play_good_sound(pitch_mod)
-		pitch_mod += pitch_mod_increase
-		await tile.animate_score()
-		
-		ctx["tile"] = tile
-		ctx["letter_index"] = letter_index
-		for rune : Rune in G.current_run_data.runes:
-			var effects : Array[RuneEffect] = rune.tile_effects(ctx)
-			for effect in effects:
-				match effect.type:
-					RuneEffect.RuneEffectType.ADD_WORD_SCORE:
-						letter_pts += effect.value
-						tile_scored.emit(letter_pts + word_pts)
-		
-
-	return letter_pts * word_mult
-
-
-	# ───────── helper: does at least one new tile touch an old tile? ─────────
-func _move_touches_board(new_tiles : Array[Vector2i]) -> bool:
-	# if nothing is locked yet, it's the first move – allow it
-	var board_empty = true
-	for row in board_state_placed_status:
-		if row.has(true):
-			board_empty = false
-			break
-	if board_empty:
-		return true   # board empty ⇒ first turn
-
-	for p in new_tiles:
-		for dir in [Vector2i(-1,0), Vector2i(1,0), Vector2i(0,-1), Vector2i(0,1)]:
-			var q  = p + dir
-			if q.x < 0 or q.x >= board_size.x or q.y < 0 or q.y >= board_size.y:
-				continue
-			if board_state_placed_status[q.y][q.x]:
-				return true   # touches an existing locked tile
-	return false
-	
-func _tiles_form_single_line(new_tiles : Array[Vector2i]) -> bool:
-	# no new tiles ⇒ not a legal move
-	if new_tiles.is_empty():
-		return false
-
-	# one tile is always OK (single-letter play or first move)
-	if new_tiles.size() == 1:
-		return true
-
-	# ── are they all in the same row or the same column? ─────────────
-	var row_same := true
-	var col_same := true
-	var row0 := new_tiles[0].y
-	var col0 := new_tiles[0].x
-
-	for p in new_tiles:
-		if p.y != row0: row_same = false
-		if p.x != col0: col_same = false
-
-	if not (row_same or col_same):
-		return false                # L-shape / scattered
-
-	# ── walk from min→max and require every square to be filled ──────
-	if row_same:
-		var xs : Array[int] = []
-		for p in new_tiles: xs.append(p.x)
-		xs.sort()
-		for x in range(xs[0], xs[-1] + 1):
-			if board_state_text[row0][x] == "":
-				return false        # real gap
-	else: # col_same
-		var ys : Array[int] = []
-		for p in new_tiles: ys.append(p.y)
-		ys.sort()
-		for y in range(ys[0], ys[-1] + 1):
-			if board_state_text[y][col0] == "":
-				return false
-
-	return true
-	
-# ------------------------------------------------------------------
-#  returns a Dictionary whose keys are Vector2i board positions
-#  and whose values are *arrays of all words that pass through
-#  that square* (includes both new and pre-existing words). 
-# ------------------------------------------------------------------
-func build_tile_word_map(words : Array) -> Dictionary:
-	var m : Dictionary = {}        # Vector2i → Array[String]
-
-	for w in words:
-		var text  : String             = w["text"]
-		var tiles : Array[Vector2i]    = w["tiles"]
-
-		for pos in tiles:
-			if not m.has(pos):
-				m[pos] = []
-			m[pos].append(text)
-
-	return m
-
-func show_definition_panel() -> void:
-
-	$DefinitionPanel.show()
-	
-func hide_definition_panel():
-	print("hiding!")
-	$DefinitionPanel.hide()
-
-func _cache_definition(word : String) -> void:
-	if _word_defs.has(word):
-		return						# already cached
-	
+func clear_definitions():	$DefinitionPanel.clear()
+func show_definition_panel():	$DefinitionPanel.show()
+func hide_definition_panel():	$DefinitionPanel.hide()
+
+func _cache_definition(word:String) -> void:
+	if _word_defs.has(word): return
 	var getter := DefinitionGetter.new()
 	getter.word_to_check = word
-	add_child(getter)				# let it run
-	var def : Definition = await getter.definition_ready
+	add_child(getter)
+	var def = await getter.definition_ready
 	_word_defs[word] = def
 	getter.queue_free()
+
+# ───────────────────────────── utility helpers ──────────────────────────────
+func _get_current_turn_tiles() -> Array[Vector2i]:
+	var a : Array[Vector2i] = []
+	for y in BOARD_SIZE.y:
+		for x in BOARD_SIZE.x:
+			if board_text[y][x] != "" and not placed_mask[y][x]:
+				a.append(Vector2i(x,y))
+	return a
+
+func buzz_tiles() -> void:
+	for p in _get_current_turn_tiles():
+		board_state[p.y][p.x].tile.bzzt()
+	AudioStreamManager.play_bad_sound()
+
+func debug_print_board() -> void:
+	var s := ""
+	for row in board_text:
+		for ch in row:
+			s += ch if ch != "" else "-"
+			s += " "
+		s += "\n"
+	print(s)
+
+# ───────────────────────── slot highlight relays ────────────────────────────
+func _slot_highlighted(s:Slot) -> void:		slot_highlighted.emit(s)
+func _slot_unhighlighted(s:Slot) -> void:	slot_unhighlighted.emit(s)

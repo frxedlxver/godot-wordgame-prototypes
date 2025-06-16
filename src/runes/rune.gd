@@ -5,10 +5,13 @@ extends Resource
 @export var description : String
 @export var icon        : Texture2D
 
-func tile_effects(ctx : Dictionary) -> Array[RuneEffect]:
-	return []				# default: no change
+func before_tile_scored(ctx : Dictionary) -> Array[RuneEffect]:
+	return []
+	
+func after_tile_scored(ctx : Dictionary) -> Array[RuneEffect]:
+	return []
 
-func word_effects(ctx : Dictionary) -> Array[RuneEffect]:
+func after_word_scored(ctx : Dictionary) -> Array[RuneEffect]:
 	return []
 
 func draw_effects(tile : GameTile) -> Array[RuneEffect]:

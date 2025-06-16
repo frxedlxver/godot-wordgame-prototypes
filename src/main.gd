@@ -5,7 +5,6 @@ var run_scene : PackedScene = preload("res://scenes/run.tscn")
 var round_scene : PackedScene = preload("res://scenes/round.tscn")
 var main_menu_scene : PackedScene = preload("res://scenes/main_menu.tscn")
 var current_run : Run
-
 var main_menu_node : MainMenu
 
 var has_saved_run : bool = false
@@ -31,7 +30,6 @@ func new_game_pressed():
 	# reset and flag as in-progress
 	G.current_run_data = RunData.new()
 	G.current_run_data.start_new_run()
-	G.current_run_data.runes = [VowelPower.new()]
 	G.prepare_rng()
   	# or RUN_DATA.reinitialize() + set fields
 

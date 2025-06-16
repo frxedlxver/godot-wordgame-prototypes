@@ -33,3 +33,10 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="UI"]
+layout_mode = 0
+offset_left = 302.0
+offset_top = 3.0
+offset_right = 625.0
+offset_bottom = 42.0

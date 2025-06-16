@@ -9,6 +9,7 @@ class_name RunData extends Resource
 @export var runes			: Array[Rune]			= []
 @export var rng_seed		: String				= ""
 @export var rng_state		: int					= 0
+@export var max_runes		: int					= 6
 
 # ----------------------------------------------------------------
 func start_new_run(seed : String = "") -> void:

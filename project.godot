@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 G="*res://src/game_state.gd"
 WORD_CHECKER="*res://src/word_checker.gd"
 SAVE_MANAGER="*res://src/save_manager.gd"
+SCORING_ENGINE="*res://src/scoring_engine.gd"
 
 [display]
 

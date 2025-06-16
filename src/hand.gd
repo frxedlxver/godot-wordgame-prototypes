@@ -29,6 +29,7 @@ func _process(delta: float) -> void:
 
 
 func add_to_hand(game_tile : GameTile, starting_position = null):
+	if game_tiles.has(game_tile): return
 	self.add_child(game_tile)
 	if starting_position and starting_position is Vector2:
 		game_tile.global_position = starting_position
@@ -84,6 +85,7 @@ func _area2d_area_entered(area):
 	if tile is GameTile and not game_tiles.has(tile):
 		game_tiles.append(tile)
 		want_reindex = true
+
 
 func _area2d_area_exited(area):
 	var tile = area.get_parent()
