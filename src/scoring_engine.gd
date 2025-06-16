@@ -103,6 +103,8 @@ func _score_word(
 					RuneEffect.RuneEffectType.MUL_TILE_SCORE:
 						tile_pts *= eff.value
 						node.ding()
+				if eff.exclamation != "":
+					node.add_child(DisappearingLabel.new(eff.exclamation, node.global_position, true))
 
 		if tile_pts > 0:
 			word_pts += tile_pts
@@ -116,6 +118,37 @@ func _score_word(
 
 		await tile.animate_score()			# tween runs, yields until finished
 		await get_tree().create_timer(0.4).timeout
+		# --- tile-level rune hooks ----------------------------------------
+		for node : RuneNode in G.current_run.rune_manager.get_runes():
+			for eff : RuneEffect in node.rune.after_tile_scored(ctx):
+				var mult_changed : bool = false
+				var score_changed : bool = false
+				match eff.type:
+					RuneEffect.RuneEffectType.ADD_SCORE:
+						word_pts += eff.value
+						score_changed = true
+						
+					RuneEffect.RuneEffectType.ADD_MULTIPLIER:
+						mult_changed = true
+						turn_in_mul += eff.value
+						
+					RuneEffect.RuneEffectType.MULT_MULTIPLIER:
+						turn_in_mul *= eff.value
+						mult_changed = true
+						
+				if score_changed:
+					turn_score_updated.emit(turn_in_pts + eff.value)
+				if mult_changed:
+					turn_mult_updated.emit(turn_in_mul + eff.value)
+
+					
+				if eff.exclamation != "":
+					node.add_child(DisappearingLabel.new(eff.exclamation, node.global_position, true))
+				if score_changed or mult_changed:
+					node.ding()
+					tile.animate_score()
+				await get_tree().create_timer(0.4).timeout
+				
 		idx += 1
 
 	# --- word-level rune hooks --------------------------------------------

@@ -8,7 +8,7 @@ func _init() -> void:
 	icon = load("res://sprites/runes/singles.png")
 
 
-func after_word_scored(ctx : Dictionary) -> Array[RuneEffect]:
+func after_tile_scored(ctx : Dictionary) -> Array[RuneEffect]:
 	# Guard: ctx may not contain "word"
 	var word : String = ctx.get("word", "")
 	if word.is_empty():
@@ -26,6 +26,7 @@ func after_word_scored(ctx : Dictionary) -> Array[RuneEffect]:
 	# All letters unique → grant multiplier bonus
 	var eff := RuneEffect.new()
 	eff.type  = RuneEffect.RuneEffectType.ADD_MULTIPLIER
-	eff.value = word.length() * 5
+	eff.value = 5
+	eff.exclamation = "+5 MULT"
 	print("Singles value : %d" % eff.value)
 	return [eff]			# <-- ALWAYS wrap in an array

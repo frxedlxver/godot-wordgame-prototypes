@@ -1,18 +1,20 @@
 class_name DisappearingLabel extends Label
 
 var starting_position : Vector2
-func _init(text_to_show : String, starting_pos : Vector2) -> void:
+var _down : bool
+func _init(text_to_show : String, starting_pos : Vector2, down : bool = false) -> void:
 	self.text = text_to_show
 	self.starting_position = starting_pos
+	_down = down
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.z_index = 1000
 	self_modulate = Color.WHITE
-	
+	label_settings = load("res://styles/disappearing_label_settings.tres")
 	self.global_position = starting_position
 	
-	var end_pos = starting_position + Vector2(0, -50)
+	var end_pos = starting_position + Vector2(0, 50 if _down else -50)
 
 	# Tween motion and fade
 	var tween = create_tween()

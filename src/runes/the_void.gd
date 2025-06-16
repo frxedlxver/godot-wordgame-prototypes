@@ -10,8 +10,10 @@ func before_tile_scored(ctx : Dictionary) -> Array[RuneEffect]:
 	effect.type = RuneEffect.RuneEffectType.NO_OP
 	if LettersNumbers.is_vowel(ctx["tile"].letter):
 		effect.type = RuneEffect.RuneEffectType.ZERO_TILE_SCORE
+		effect.exclamation = "V0ID"
 	else:
 		effect.type = RuneEffect.RuneEffectType.MUL_TILE_SCORE
+		effect.exclamation = "Double it!"
 		effect.value = 2
 	return [effect]
 
