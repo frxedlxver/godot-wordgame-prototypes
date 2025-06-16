@@ -23,10 +23,14 @@ func _on_new_game_pressed():
 	settings_button.slide_out()
 	continue_button.slide_out()
 	new_game_button.spin_to_oblivion()
+	await new_game_button.pressed_animation_finished
 	new_game_pressed.emit()
-	
+
 func _on_continue_pressed():
-	pass
+	settings_button.slide_out()
+	new_game_button.slide_out()
+	continue_button.spin_to_oblivion()
+	continue_pressed.emit()
 	
 func _on_settings_pressed():
 	pass

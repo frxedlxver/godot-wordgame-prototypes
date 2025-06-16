@@ -21,6 +21,7 @@ func save_data() -> void:
 	else:
 		_cache.run_pending = false
 		_cache.run_data.reinitialize()
+	G.current_run_data.rng_state = G.rng.state
 	_serialize()
 
 func has_saved_run() -> bool:
@@ -31,12 +32,7 @@ func load_saved_run() -> bool:
 	if not _cache.run_pending:
 		return false
 
-	G.current_run_data.copy_from(_cache.run_data)
-
-	# Consume the snapshot so it cannot be loaded twice.
-	_cache.run_pending = false
-	_cache.run_data.reinitialize()
-	_serialize()
+	G.current_run_data = _cache.run_data
 	return true
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -49,7 +45,6 @@ func _load_or_create() -> void:
 			push_warning("Profile corrupted – starting fresh")
 	if _cache == null:
 		_cache = SaveData.new()
-	G.current_run_data = _cache.run_data
 
 func _serialize() -> void:
 	var err := ResourceSaver.save(

@@ -90,13 +90,11 @@ func _area2d_area_exited(area):
 	if tile is GameTile:
 		game_tiles.erase(tile)
 		want_reindex = true
-		
+	
 func _tile_grabbed(gametile : GameTile):
 	grabbed_tile = gametile
 	gametile.z_index = 1000
 	tile_grabbed.emit(gametile)
-
-
 	
 func _tile_released(gametile : GameTile):
 	grabbed_tile = null
@@ -105,7 +103,6 @@ func _tile_released(gametile : GameTile):
 	
 	want_reindex = true
 	tile_released.emit(gametile)
-	
 	
 	var current_slot = get_highlighted_slot()
 	if current_slot:

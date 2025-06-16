@@ -231,8 +231,6 @@ func remove_tile(tile : GameTile):
 	debug_print_board()
 
 
-
-
 func debug_print_board():
 	var board_string = ''
 	for row in board_state_text:
@@ -360,10 +358,17 @@ func _score_word(info : Dictionary, starting_pitch : float, word_pts : int) -> i
 	var tiles : Array = info["tiles"]
 	var word_mult := 1
 	var letter_pts := 0
+	var ctx = {
+		"word" : info["text"],
+		"tile" : null,
+		"letter_index" : 0
+	}
 
 	var pitch_mod = starting_pitch
 	var pitch_mod_increase = 0.04
+	var letter_index = 0
 	for pos in tiles:
+		letter_index += 1
 		var tile = board_state[pos.y][pos.x].tile
 		var letter_score = tile.score
 		
@@ -373,10 +378,20 @@ func _score_word(info : Dictionary, starting_pitch : float, word_pts : int) -> i
 		pitch_mod += pitch_mod_increase
 		await tile.animate_score()
 		
+		ctx["tile"] = tile
+		ctx["letter_index"] = letter_index
+		for rune : Rune in G.current_run_data.runes:
+			var effects : Array[RuneEffect] = rune.tile_effects(ctx)
+			for effect in effects:
+				match effect.type:
+					RuneEffect.RuneEffectType.ADD_WORD_SCORE:
+						letter_pts += effect.value
+						tile_scored.emit(letter_pts + word_pts)
+		
 
 	return letter_pts * word_mult
-	
-	
+
+
 	# ───────── helper: does at least one new tile touch an old tile? ─────────
 func _move_touches_board(new_tiles : Array[Vector2i]) -> bool:
 	# if nothing is locked yet, it's the first move – allow it

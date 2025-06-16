@@ -40,6 +40,7 @@ func play_tiles():
 		while hand.tile_count() < G.current_run_data.max_hand_size:
 			var tile = bag.draw_tile()
 			
+			
 			hand.add_to_hand(tile, $Bag.global_position)
 			await get_tree().create_timer(0.1).timeout
 			

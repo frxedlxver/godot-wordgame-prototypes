@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://jb12j5p22epv"]
+
+[ext_resource type="Script" path="res://src/main.gd" id="1_kiayv"]
+[ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
+[ext_resource type="Script" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
+[ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
+
+[node name="Node2D" type="Node2D"]
+position = Vector2(1, 0)
+script = ExtResource("1_kiayv")
+
+[node name="AudioStreamManager" type="Node" parent="."]
+script = ExtResource("6_vu4vo")
+
+[node name="Bad" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("7_l8hsb")
+
+[node name="Good" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("8_io1cw")
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -100
+material = ExtResource("2_68p7e")
+offset_right = 960.0
+offset_bottom = 540.0
+mouse_filter = 2
+
+[node name="UI" type="Control" parent="."]
+custom_minimum_size = Vector2(960, 540)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
