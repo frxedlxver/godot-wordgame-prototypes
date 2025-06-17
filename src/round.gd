@@ -16,7 +16,7 @@ var highlighted_board_slot : Slot
 
 # ─────────────────────────────── lifecycle ────────────────────────────────
 func initialize(bag_data : Array[GameTileData], required_score : int = 0) -> void:
-	
+	TILE_MANIPULATOR.register_hand_board(hand, board)
 	_required_score = required_score
 	round_ui.update_required_score(required_score)
 	# board → round connections
