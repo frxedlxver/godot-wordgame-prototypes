@@ -9,12 +9,16 @@ extends Node2D
 
 var turn_score : int = 0
 var total_score : int = 0
+var _required_score : int = 0
 var mult : int = 1
 
 var highlighted_board_slot : Slot
 
 # ─────────────────────────────── lifecycle ────────────────────────────────
-func initialize(bag_data : Array[GameTileData]) -> void:
+func initialize(bag_data : Array[GameTileData], required_score : int = 0) -> void:
+	
+	_required_score = required_score
+	round_ui.update_required_score(required_score)
 	# board → round connections
 	board.slot_highlighted.connect(func(slot): highlighted_board_slot = slot)
 	board.slot_unhighlighted.connect(func(_slot): highlighted_board_slot = null)
@@ -85,10 +89,15 @@ func on_mult_changed(new_mult : int) -> void:
 	round_ui.update_mult(mult)
 
 func on_scoring_complete() -> void:
-	turn_score *= mult
-	total_score += turn_score
+	var turn_total = turn_score * mult
+	round_ui.update_turn_total(turn_total)
+	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS).timeout
+	total_score += turn_total
 	round_ui.update_total_score(total_score)
+	start_new_turn()
 
+func start_new_turn():
+	round_ui.update_turn_total(0)
 	turn_score = 0
 	round_ui.update_turn_score(0)
 

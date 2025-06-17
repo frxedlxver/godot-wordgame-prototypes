@@ -154,9 +154,8 @@ func lock_in():
 	
 		
 func animate_score():
-	self.self_modulate = Color.GREEN
 	run_scale_tween(0.1, Vector2.ONE, Vector2.ONE * 1.1, false)
-	await run_color_tween(0.1, Color.GRAY, true)
+	run_color_tween(0.1, Color.GRAY, true)
 	
 # ───────────────────────────── bzzt effect ─────────────────────────────
 func bzzt() -> void:

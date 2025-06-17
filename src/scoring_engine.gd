@@ -3,6 +3,8 @@
 class_name ScoringEngine
 extends Node          # Autoload
 
+const TIME_BETWEEN_ANIMATIONS = 0.2
+
 signal turn_score_updated(new_score : int)
 signal turn_mult_updated(new_mult : int)
 signal score_calculation_complete(points:int, mult:int, legal:bool)
@@ -96,15 +98,10 @@ func _score_word(
 				match eff.type:
 					RuneEffect.RuneEffectType.ZERO_TILE_SCORE:
 						tile_pts = 0
-						node.ding()
 					RuneEffect.RuneEffectType.ADD_TILE_SCORE:
 						tile_pts += eff.value
-						node.ding()
 					RuneEffect.RuneEffectType.MUL_TILE_SCORE:
 						tile_pts *= eff.value
-						node.ding()
-				if eff.exclamation != "":
-					node.add_child(DisappearingLabel.new(eff.exclamation, node.global_position, true))
 
 		if tile_pts > 0:
 			word_pts += tile_pts
@@ -116,8 +113,8 @@ func _score_word(
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 
-		await tile.animate_score()			# tween runs, yields until finished
-		await get_tree().create_timer(0.4).timeout
+		tile.animate_score()			# tween runs, yields until finished
+		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 		# --- tile-level rune hooks ----------------------------------------
 		for node : RuneNode in G.current_run.rune_manager.get_runes():
 			for eff : RuneEffect in node.rune.after_tile_scored(ctx):
@@ -146,8 +143,10 @@ func _score_word(
 					node.add_child(DisappearingLabel.new(eff.exclamation, node.global_position, true))
 				if score_changed or mult_changed:
 					node.ding()
+					AudioStreamManager.play_good_sound(pitch)
+					pitch += STEP
 					tile.animate_score()
-				await get_tree().create_timer(0.4).timeout
+				await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 				
 		idx += 1
 

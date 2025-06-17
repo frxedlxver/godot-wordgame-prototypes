@@ -1,7 +1,10 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://dvrrkdj1rv0l6"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://dvrrkdj1rv0l6"]
 
 [ext_resource type="StyleBox" uid="uid://c7iwya6854te2" path="res://styles/tooltip_stylebox.tres" id="1_0kpxh"]
+[ext_resource type="StyleBox" uid="uid://buokf3cp0p88h" path="res://styles/rune_panel_stylebox.tres" id="2_4dlgg"]
 
 [resource]
 DefinitionPanel/base_type = &"Panel"
 DefinitionPanel/styles/panel = ExtResource("1_0kpxh")
+RuneDisplayPanel/base_type = &"PanelContainer"
+RuneDisplayPanel/styles/panel = ExtResource("2_4dlgg")

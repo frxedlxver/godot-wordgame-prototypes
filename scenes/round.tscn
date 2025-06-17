@@ -1,12 +1,15 @@
-[gd_scene load_steps=9 format=3 uid="uid://boutt7jysbfio"]
+[gd_scene load_steps=12 format=3 uid="uid://boutt7jysbfio"]
 
 [ext_resource type="Script" path="res://src/round.gd" id="1_grh2k"]
 [ext_resource type="Script" path="res://src/round_ui.gd" id="2_ie7ca"]
 [ext_resource type="PackedScene" uid="uid://crpel47irxv8u" path="res://scenes/bag_ui.tscn" id="3_istxk"]
+[ext_resource type="Texture2D" uid="uid://8ufq1tnd3hso" path="res://sprites/points_bar.png" id="4_1s4o2"]
 [ext_resource type="PackedScene" uid="uid://c6ynr0i46i876" path="res://scenes/bag.tscn" id="4_3w6v7"]
 [ext_resource type="LabelSettings" uid="uid://bm22qfiyln1hl" path="res://styles/disappearing_label_settings.tres" id="4_ywbev"]
 [ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="5_tm448"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="6_x02pj"]
+[ext_resource type="Texture2D" uid="uid://cg5sfqo6gsh25" path="res://sprites/mult_bar.png" id="7_6qddn"]
+[ext_resource type="Texture2D" uid="uid://br84r2qlenp3a" path="res://sprites/mulligan.png" id="9_b6fnw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wspnp"]
 size = Vector2(306, 306)
@@ -19,16 +22,30 @@ board = NodePath("Board")
 hand = NodePath("Hand")
 round_ui = NodePath("Round UI")
 
-[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("turn_score_label", "mult_label", "total_score_label", "bag_ui")]
+[node name="Bag" parent="." instance=ExtResource("4_3w6v7")]
+
+[node name="Board" parent="." instance=ExtResource("5_tm448")]
+position = Vector2(0, 0)
+
+[node name="DebugShape" type="CollisionShape2D" parent="Board"]
+position = Vector2(0, -24)
+shape = SubResource("RectangleShape2D_wspnp")
+
+[node name="Hand" parent="." instance=ExtResource("6_x02pj")]
+position = Vector2(0, 196)
+
+[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("turn_score_label", "turn_total_label", "required_score_label", "mult_label", "total_score_label", "bag_ui")]
 layout_mode = 3
 anchors_preset = 0
-offset_left = -480.0
+offset_left = -479.0
 offset_top = -270.0
-offset_right = -440.0
+offset_right = -439.0
 offset_bottom = -230.0
 script = ExtResource("2_ie7ca")
-turn_score_label = NodePath("HBoxContainer/TurnScore")
-mult_label = NodePath("HBoxContainer/Mult")
+turn_score_label = NodePath("VBoxContainer/TurnScoreArea/Points/Amount")
+turn_total_label = NodePath("VBoxContainer/HBoxContainer/Label2")
+required_score_label = NodePath("ScoreContainer/RequiredScore/Amount")
+mult_label = NodePath("VBoxContainer/TurnScoreArea/Mult/Amount")
 total_score_label = NodePath("ScoreContainer/TotalScore/Amount")
 bag_ui = NodePath("BagUI")
 
@@ -46,28 +63,49 @@ offset_bottom = 508.0
 grow_horizontal = 1
 grow_vertical = 1
 
-[node name="Button" type="Button" parent="Round UI"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Round UI"]
 layout_mode = 0
-offset_left = 732.0
-offset_top = 403.0
-offset_right = 866.0
-offset_bottom = 470.0
-text = "Play Tiles
-"
+offset_left = 8.0
+offset_top = 120.0
+offset_right = 316.0
+offset_bottom = 220.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Round UI"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = 346.0
-offset_top = 78.0
-offset_right = 589.0
-offset_bottom = 120.0
-grow_horizontal = 2
-
-[node name="TurnScore" type="Label" parent="Round UI/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Round UI/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="Round UI/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Turn Total: "
+label_settings = ExtResource("4_ywbev")
+
+[node name="Label2" type="Label" parent="Round UI/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(192, 0)
+layout_mode = 2
+text = "0"
+label_settings = ExtResource("4_ywbev")
+
+[node name="TurnScoreArea" type="HBoxContainer" parent="Round UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Points" type="TextureRect" parent="Round UI/VBoxContainer/TurnScoreArea"]
+layout_mode = 2
+texture = ExtResource("4_1s4o2")
+
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/TurnScoreArea/Points"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -38.0
+offset_top = -15.0
+offset_right = 39.0
+offset_bottom = 27.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 text = "0"
@@ -75,7 +113,7 @@ label_settings = ExtResource("4_ywbev")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="x" type="Label" parent="Round UI/HBoxContainer"]
+[node name="x" type="Label" parent="Round UI/VBoxContainer/TurnScoreArea"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -84,8 +122,23 @@ label_settings = ExtResource("4_ywbev")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Mult" type="Label" parent="Round UI/HBoxContainer"]
+[node name="Mult" type="TextureRect" parent="Round UI/VBoxContainer/TurnScoreArea"]
 layout_mode = 2
+texture = ExtResource("7_6qddn")
+
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/TurnScoreArea/Mult"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -38.5
+offset_top = -15.0
+offset_right = 39.5
+offset_bottom = 27.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 text = "0"
@@ -140,13 +193,36 @@ text = "0"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Bag" parent="." instance=ExtResource("4_3w6v7")]
+[node name="Plays" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+layout_mode = 2
 
-[node name="Board" parent="." instance=ExtResource("5_tm448")]
-position = Vector2(0, 0)
+[node name="Label" type="Label" parent="Round UI/ScoreContainer/Plays"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+text = "Plays:"
+label_settings = ExtResource("4_ywbev")
+vertical_alignment = 1
 
-[node name="DebugShape" type="CollisionShape2D" parent="Board"]
-shape = SubResource("RectangleShape2D_wspnp")
+[node name="Amount" type="Label" parent="Round UI/ScoreContainer/Plays"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "0"
+label_settings = ExtResource("4_ywbev")
+vertical_alignment = 1
 
-[node name="Hand" parent="." instance=ExtResource("6_x02pj")]
-position = Vector2(0, 239.055)
+[node name="Mulligans" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Round UI/ScoreContainer/Mulligans"]
+layout_mode = 2
+texture = ExtResource("9_b6fnw")
+
+[node name="Amount" type="Label" parent="Round UI/ScoreContainer/Mulligans"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "0"
+label_settings = ExtResource("4_ywbev")
+vertical_alignment = 1
