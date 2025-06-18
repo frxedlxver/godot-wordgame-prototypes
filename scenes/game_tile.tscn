@@ -8,7 +8,6 @@
 size = Vector2(32, 32)
 
 [node name="GameTile" type="Sprite2D"]
-position = Vector2(298, 188)
 texture = ExtResource("1_ydtsf")
 script = ExtResource("2_0evji")
 

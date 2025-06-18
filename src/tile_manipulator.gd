@@ -2,8 +2,6 @@
 class_name TileManipulator
 extends Node2D
 
-
-
 var _hand  : Hand
 var _board : Board
 var _active_tile : GameTile = null
@@ -19,6 +17,7 @@ func clear_registrations():
 func _process(delta: float) -> void:
 	if _active_tile:
 		_active_tile.global_position = get_global_mouse_position()
+		print(_active_tile.get_parent().name)
 
 # call for every tile you spawn
 func register_tile(tile : GameTile) -> void:
@@ -33,22 +32,13 @@ func register_tile(tile : GameTile) -> void:
 func _on_tile_grabbed(tile : GameTile) -> void:
 	_active_tile = tile
 	tile.z_index = 1000
-
+	
 	# 1. Detach from whatever parent (Hand or Board) immediately
-	var gpos := tile.global_position
 	var tile_parent = tile.get_parent()
 	if tile_parent is Hand:
 		_hand.remove_from_hand(tile)
 	elif tile_parent is Board:
 		_board.remove_tile(tile)
-	get_tree().current_scene.add_child(tile)   # temporary root-level owner
-	tile.global_position = gpos                # restore visual position
-
-	# 2. If it came from the board, update board state
-	if tile.coordinates != -Vector2i.ONE:
-		_board.remove_tile(tile)               # clears board grids
-		tile.coordinates = -Vector2i.ONE       # mark “no slot yet”
-
 	# 3. Tell the hand to start gap preview (it keeps tile in its list purely
 	#    as a placeholder; being outside its node tree is fine)
 	_hand.start_preview(tile)
@@ -70,9 +60,9 @@ func _on_tile_released(tile : GameTile) -> void:
 		_hand.add_to_hand(tile)
 		tile.set_state(GameTile.TileState.IDLE)
 
-
-
 func _on_tile_return(tile : GameTile) -> void:
+	if tile.get_parent() is Board:
+		_board.remove_tile(tile)
 	_hand.stop_preview()
 	_hand.add_to_hand(tile)
 

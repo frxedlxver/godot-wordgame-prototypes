@@ -7,7 +7,6 @@
 [ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="8_io1cw"]
 
 [node name="Node2D" type="Node2D"]
-position = Vector2(1, 0)
 script = ExtResource("1_kiayv")
 
 [node name="AudioStreamManager" type="Node" parent="."]

@@ -27,7 +27,6 @@ signal return_to_hand(GameTile)		# request from Board → Hand
 var state			: TileState		= TileState.IDLE
 var visual_state	: VisualState	= VisualState.NORMAL
 var coordinates		: Vector2i		= -Vector2i.ONE		# (-1,-1) = in hand
-
 var data			: GameTileData		# reference to save-data struct
 
 # ───────────────────────────── private refs ────────────────────────────
@@ -78,17 +77,21 @@ func set_state(new_state : TileState) -> void:
 	match new_state:
 		TileState.GRABBED_FROM_HAND:
 			grabbed.emit(self)
+			$TextEdit.text = "GBHN"
 
 		TileState.GRABBED_FROM_BOARD:
 			grabbed.emit(self)
-
+			$TextEdit.text = "GBBD"
 		TileState.IDLE:
 			return_to_hand.emit(self)
-
+			$TextEdit.text = "IDLE"
 		TileState.PLACED_ON_BOARD:
+			$TextEdit.text = "PLCD"
+			
 			pass								# nothing extra
 
 		TileState.LOCKED_IN:
+			$TextEdit.text = "LCKD"
 			$Area2D.input_event.disconnect(_on_area2d_input_event)
 			$Area2D.mouse_entered.disconnect(_on_area2d_mouse_enter)
 			$Area2D.mouse_exited .disconnect(_on_area2d_mouse_exit)

@@ -14,9 +14,11 @@ var mult : int = 1
 
 var highlighted_board_slot : Slot
 
+signal finished
+
 # ─────────────────────────────── lifecycle ────────────────────────────────
 func initialize(bag_data : Array[GameTileData], required_score : int = 0) -> void:
-	TILE_MANIPULATOR.register_hand_board(hand, board)
+	TILE_MANIPULATOR.register_hand_board(hand, board) 
 	_required_score = required_score
 	round_ui.update_required_score(required_score)
 	# board → round connections
@@ -33,9 +35,26 @@ func initialize(bag_data : Array[GameTileData], required_score : int = 0) -> voi
 	animate_in()
 
 func animate_in() -> void:
+	var board_tween = create_tween()
+	board_tween.tween_property(board, "position", Vector2.ZERO, 0.5)
+	var ui_tween = create_tween()
+	ui_tween.tween_property(round_ui, "position", Vector2.ZERO, 0.5)
 	while hand.tile_count() < G.current_run_data.max_hand_size and not bag.is_empty():
 		await get_tree().create_timer(0.05).timeout
 		hand.add_to_hand(bag.draw_tile())
+		
+func end() -> void:
+	await animate_out()
+	self.queue_free()
+
+func animate_out():
+	var board_tween = create_tween()
+	board_tween.tween_property(board, "position", Vector2(0, -500), 0.5)
+	await get_tree().create_timer(0.2).timeout
+	var ui_tween = create_tween()
+	ui_tween.tween_property(round_ui, "position", Vector2(-500, 0), 0.5)
+	await ui_tween.finished
+	
 
 # ───────────────────────────── input handler ──────────────────────────────
 func _unhandled_input(event : InputEvent) -> void:
@@ -49,19 +68,26 @@ func on_tile_placed(tile : GameTile, slot : Slot) -> void:
 # ───────────────────────────── play action ────────────────────────────────
 func play_tiles() -> void:
 	var snap := board.get_turn_snapshot()
-
+	var legal = SCORING_ENGINE.validate_turn(
+		snap.board_text,
+		snap.placed_mask,
+		snap.new_tiles
+	)
+	if not legal:
+		board.buzz_tiles()
+		return
+	
 	# start scoring (runs async inside ScoringEngine)
 	SCORING_ENGINE.score_turn(
 		snap.board_text,
 		snap.board_tiles,
 		snap.placed_mask,
 		snap.new_tiles)
-
+	
+	var result = await  SCORING_ENGINE.score_calculation_complete
 	# wait for engine to finish and give us the result tuple
-	var result = await SCORING_ENGINE.score_calculation_complete
 	var points : int = result[0]
 	var mult   : int = result[1]
-	var legal  : bool = result[2]
 
 	if legal:
 		turn_score += points
@@ -94,7 +120,10 @@ func on_scoring_complete() -> void:
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS).timeout
 	total_score += turn_total
 	round_ui.update_total_score(total_score)
-	start_new_turn()
+	if total_score > _required_score:
+		finished.emit()
+	else:
+		start_new_turn()
 
 func start_new_turn():
 	round_ui.update_turn_total(0)

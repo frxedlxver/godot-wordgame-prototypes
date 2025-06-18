@@ -57,14 +57,14 @@ func _process(_dt : float) -> void:
 		var coord = _get_coord_under_mouse()
 		_update_definition_panel(coord)
 
-func _input(event) -> void:
-	if event.is_action_pressed("show_defs"):
-		show_defs_held = true
-		show_definition_panel()
-	elif event.is_action_released("show_defs"):
-		show_defs_held = false
-		_hover_coord = Vector2i(-1, -1)
-		hide_definition_panel()
+#func _input(event) -> void:
+	#if event.is_action_pressed("show_defs"):
+		#show_defs_held = true
+		#show_definition_panel()
+	#elif event.is_action_released("show_defs"):
+		#show_defs_held = false
+		#_hover_coord = Vector2i(-1, -1)
+		#hide_definition_panel()
 
 # ─────────────────────── public interface for Game Flow ─────────────────────
 func get_turn_snapshot() -> Dictionary:
@@ -145,6 +145,7 @@ func place_tile_at(tile : GameTile, target_slot : Slot) -> void:
 	_snap_tile_to_slot(tile, target_slot)
 
 func remove_tile(tile : GameTile) -> void:
+
 	if tile.coordinates == -Vector2i.ONE:
 		return
 

@@ -7,8 +7,31 @@ const TIME_BETWEEN_ANIMATIONS = 0.2
 
 signal turn_score_updated(new_score : int)
 signal turn_mult_updated(new_mult : int)
-signal score_calculation_complete(points:int, mult:int, legal:bool)
+signal score_calculation_complete(points:int, mult:int)
 
+func validate_turn(
+		board_text  : Array,      # Array[Array[String]]
+		placed_mask : Array,      # Array[Array[bool]]
+		new_tiles   : Array       # Array[Vector2i]
+) -> bool:
+
+	# 1. positional rules --------------------------------------------------
+	if not _tiles_form_single_line(board_text, new_tiles) \
+	or	not _move_touches_board(placed_mask, board_text, new_tiles):
+		return false
+
+	# 2. dictionary rules --------------------------------------------------
+	var dict_check = Evaluator.evaluate_board(board_text)
+	if dict_check["illegal"].size() > 0:
+		return false
+
+	# 3. collect words -----------------------------------------------------
+	var words = _collect_words(board_text, new_tiles)
+	if words.is_empty():
+		return false
+
+	return true
+	
 # ───────────────────────  public entry  ─────────────────────────────────────
 func score_turn(
 		board_text   : Array,      # Array[Array[String]]
@@ -20,27 +43,7 @@ func score_turn(
 	var turn_pts : int = 0
 	var turn_mul : int = 1
 
-	# 0. validation ----------------------------------------------------------
-	if not _tiles_form_single_line(board_text, new_tiles) \
-	or	not _move_touches_board(placed_mask, board_text, new_tiles):
-		AudioStreamManager.play_bad_sound()
-		score_calculation_complete.emit(0, 1, false)
-		return
-
-	# 0-B  dictionary rules --------------------------------------------------
-	var dict_check = Evaluator.evaluate_board(board_text)  # ← your existing helper
-	var illegal    = dict_check["illegal"]                 # Array[Vector2i]
-
-	if illegal.size() > 0:
-		score_calculation_complete.emit(0, 1, false)
-		return
-
-	# 1. collect words -------------------------------------------------------
-	var words : Array = _collect_words(board_text, new_tiles)
-	if words.is_empty():
-		score_calculation_complete.emit(0, 1, false)
-		return
-
+	var words = _collect_words(board_text, new_tiles)
 	# 2. score each word (plays SFX & tweens inline) -------------------------
 	var pitch : float = 0.0
 	for w in words:
@@ -56,7 +59,6 @@ func score_turn(
 		}
 		
 		# --- word-level rune hooks ----------------------------------------
-		
 		for node : RuneNode in G.current_run.rune_manager.get_runes():
 			for eff : RuneEffect in node.rune.after_word_scored(word_ctx):
 				match eff.type:
@@ -108,8 +110,7 @@ func _score_word(
 			turn_score_updated.emit(turn_in_pts + word_pts)
 		
 		add_child(DisappearingLabel.new("+%d" % tile_pts, tile.global_position))
-		
-		
+
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 

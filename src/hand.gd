@@ -6,6 +6,7 @@ extends Node2D
 const TILE_SIZE			: int = 32
 const TILE_MAX_SEP		: int = 48
 const MAX_HAND_WIDTH	: int = TILE_SIZE * 10		# visual cap (10 tiles wide)
+const PREVIEW_GAP_FACTOR  : float = 1.00                # 0 = no gap, 1 = full gap
 
 # ────────────────────────────── data members ──────────────────────────────
 var game_tiles		: Array[GameTile] = []		# canonical order
@@ -26,12 +27,13 @@ func _process(_delta : float) -> void:
 	if want_reindex:
 		want_reindex = false
 		reindex_tiles()
+		_reorder_game_tiles()
+		
 
 	# live gap preview
 	if _preview_tile and _tile_is_over_hand(_preview_tile):
 		_preview_gap_for(_preview_tile)
-	elif _preview_tile == null:
-		_reorder_game_tiles()
+
 
 # ───────────────────────────── public API ────────────────────────────────
 ## Called by TileManipulator on drag-start
@@ -50,6 +52,7 @@ func stop_preview() -> void:
 	want_reindex = true
 
 func add_to_hand(tile : GameTile, global_pos = null) -> void:
+	tile.coordinates = Vector2.ONE * -1
 	if game_tiles.has(tile):
 		return
 	
@@ -65,8 +68,6 @@ func add_to_hand(tile : GameTile, global_pos = null) -> void:
 
 func remove_from_hand(tile : GameTile) -> void:
 	game_tiles.erase(tile)
-	if tile.get_parent() == self:
-		remove_child(tile)
 	want_reindex = true
 
 func tile_count() -> int:
@@ -83,58 +84,90 @@ func _reorder_game_tiles() -> void:
 	_apply_layout(game_tiles)
 
 func _preview_gap_for(tile : GameTile) -> void:
-	var tmp = game_tiles.duplicate()
-	tmp.erase(tile)					# ignore dragged tile
-	var idx = _index_from_mouse()
-	tmp.insert(idx, null)			# placeholder gap
-	_apply_layout(tmp)
+	# 1. Work on a copy (game_tiles never contains the dragged tile)
+	var sorted := game_tiles.duplicate()
+	# Sort by global x so we always compare apples to apples
+	sorted.sort_custom(func(a : GameTile, b : GameTile) -> bool:
+		return a.global_position.x < b.global_position.x)
+
+	# 2. Determine insertion index based on current cursor position
+	var idx := _index_from_neighbour_positions(tile.global_position.x, sorted)
+
+	# 3. Insert placeholder gap and lay out the row
+	sorted.insert(idx, null)
+	_apply_layout(sorted)
+
+# ---------------------------------------------------------------
+func _index_from_neighbour_positions(cursor_x : float, sorted_tiles : Array) -> int:
+	for i in sorted_tiles.size():
+		if cursor_x < sorted_tiles[i].global_position.x:
+			return i                      # slot is to the left of this tile
+	return sorted_tiles.size()           # cursor is past all tiles → append
 
 func _apply_layout(layout : Array) -> void:
 	if layout.is_empty():
 		return
 
-	var sep		= min(TILE_MAX_SEP, MAX_HAND_WIDTH / layout.size())
-	var span	= (layout.size() - 1) * sep
-	var start_x = -span * 0.5
+	var sep      = min(TILE_MAX_SEP, MAX_HAND_WIDTH / layout.size())
+	var span     = (layout.size() - 1) * sep
+	var start_x  = -span * 0.5
+	var gap_idx  = layout.find(null)          # where the placeholder sits
 
 	for i in layout.size():
 		var t = layout[i]
 		if t == null:
-			continue				# the gap
+			continue                          # skip the placeholder
+
+		# Compute slot index with compressed gap
+		var eff_i := float(i)
+		if gap_idx != -1 and i > gap_idx:
+			eff_i -= (1.0 - PREVIEW_GAP_FACTOR)
+
+		var pos = Vector2(start_x + eff_i * sep, 0)
+
 		if t.state in [
 			GameTile.TileState.IDLE,
 			GameTile.TileState.RELEASED
 		]:
-			var pos  = Vector2(start_x + i * sep, 0)
-			var tw   = create_tween()
-			tw.tween_property(t, "position", pos, 0.18).set_ease(Tween.EASE_OUT)
+			var tw = create_tween()
+			tw.tween_property(t, "position", pos, 0.18)\
+			  .set_ease(Tween.EASE_OUT)
+
 
 # ────────────────────────── geometry helpers ──────────────────────────────
-func _index_from_mouse() -> int:
-	var local_x = to_local(get_global_mouse_position()).x
-	var sep		= min(TILE_MAX_SEP, MAX_HAND_WIDTH / max(game_tiles.size(), 1))
-	var span	= (game_tiles.size() - 1) * sep
+func _index_from_global_position(object_global_pos : Vector2) -> int:
+	var count = max(
+		game_tiles.size() + (0 if _preview_tile == null else 0),  # ← add 1 for gap
+		1
+	)
+
+	var local_x = to_local(object_global_pos).x
+	var sep     = min(TILE_MAX_SEP, MAX_HAND_WIDTH / count)
+	var span    = (count - 1) * sep
 	var start_x = -span * 0.5
-	var idx		= int(round((local_x - start_x) / sep))
-	return clamp(idx, 0, game_tiles.size() - 1)
+	var idx     = int(round((local_x - start_x) / sep))
+
+	return clamp(idx, 0, count - 1)
+
+
 
 func _tile_is_over_hand(tile : GameTile) -> bool:
 	return $Area2D.get_overlapping_areas().has(tile.get_node("Area2D"))
 
-# ─────────────────────── area overlap bookkeeping ─────────────────────────
 func _on_area_entered(area : Area2D) -> void:
-	var tile = area.get_parent()
-	if tile is GameTile and not game_tiles.has(tile):
-		game_tiles.append(tile)
-		want_reindex = true
+	var tile := area.get_parent()
+	if tile is GameTile and tile.state in [
+		GameTile.TileState.GRABBED_FROM_HAND,
+		GameTile.TileState.GRABBED_FROM_BOARD
+	]:
+		start_preview(tile)              # show live gap
 
 func _on_area_exited(area : Area2D) -> void:
-	var tile = area.get_parent()
-	if tile is GameTile:
-		game_tiles.erase(tile)
-		want_reindex = true
-		if tile == _preview_tile:
-			_preview_tile = null
+	var tile := area.get_parent()
+	if tile == _preview_tile:
+		stop_preview()                   # collapse gap
+
+
 
 # ───────────────────────────── utilities ──────────────────────────────────
 func _dedupe_and_prune_tiles() -> void:

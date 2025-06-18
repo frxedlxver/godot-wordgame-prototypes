@@ -47,4 +47,3 @@ func continue_button_pressed():
 	add_child(current_run)
 	G.prepare_rng()
 	current_run.start()
-	
