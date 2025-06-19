@@ -5,8 +5,7 @@ extends Sprite2D
 # ─────────────────────────────── enums ────────────────────────────────
 enum TileState {
 	IDLE,					# sitting in the hand
-	GRABBED_FROM_HAND,		# being dragged (origin = hand)
-	GRABBED_FROM_BOARD,		# being dragged (origin = board)
+	GRABBED,
 	PLACED_ON_BOARD,		# resting on a slot but not locked
 	RELEASED,
 	LOCKED_IN				# committed – cannot move
@@ -75,13 +74,9 @@ func set_state(new_state : TileState) -> void:
 	state = new_state
 
 	match new_state:
-		TileState.GRABBED_FROM_HAND:
+		TileState.GRABBED:
 			grabbed.emit(self)
 			$TextEdit.text = "GBHN"
-
-		TileState.GRABBED_FROM_BOARD:
-			grabbed.emit(self)
-			$TextEdit.text = "GBBD"
 		TileState.IDLE:
 			return_to_hand.emit(self)
 			$TextEdit.text = "IDLE"
@@ -110,6 +105,7 @@ func set_visual_state(vs : VisualState) -> void:
 		VisualState.HOVERED:
 			scale = Vector2(1.1, 1.1)
 			self_modulate = Color8(255, 230, 230, 255)
+			AudioStreamManager.play_tick()
 
 		VisualState.LOCKED_IN:
 			scale = Vector2.ONE
@@ -119,14 +115,10 @@ func set_visual_state(vs : VisualState) -> void:
 # ─────────────────────────── mouse handlers ────────────────────────────
 func _on_area2d_input_event(_viewport, event, _shape_idx) -> void:
 	if event.is_action_pressed("grab_tile"):
-		if state == TileState.PLACED_ON_BOARD:
-			# ask the Board owner if we may pick up
-			set_state(TileState.GRABBED_FROM_BOARD)
-		elif state == TileState.IDLE:
-			set_state(TileState.GRABBED_FROM_HAND)
+			set_state(TileState.GRABBED)
 
 	elif event.is_action_released("grab_tile"):
-		if state in [TileState.GRABBED_FROM_HAND, TileState.GRABBED_FROM_BOARD]:
+		if state == TileState.GRABBED:
 			released.emit(self)
 
 	elif event.is_action_pressed("return_tile_to_hand"):
@@ -135,11 +127,11 @@ func _on_area2d_input_event(_viewport, event, _shape_idx) -> void:
 			set_state(TileState.IDLE)
 
 func _on_area2d_mouse_enter() -> void:
-	if state != TileState.LOCKED_IN:
+	if state != TileState.LOCKED_IN and state != TileState.GRABBED:
 		set_visual_state(VisualState.HOVERED)
 
 func _on_area2d_mouse_exit() -> void:
-	if state != TileState.LOCKED_IN:
+	if state != TileState.LOCKED_IN and state != TileState.GRABBED:
 		set_visual_state(VisualState.NORMAL)
 
 # ───────────────────────────── board hooks ─────────────────────────────

@@ -5,8 +5,8 @@ extends Node          # Autoload
 
 const TIME_BETWEEN_ANIMATIONS = 0.2
 
-signal turn_score_updated(new_score : int)
-signal turn_mult_updated(new_mult : int)
+signal turn_score_updated(label : DisappearingLabel, new_score : int)
+signal turn_mult_updated(label : DisappearingLabel, new_mult : int)
 signal score_calculation_complete(points:int, mult:int)
 
 func validate_turn(
@@ -64,10 +64,8 @@ func score_turn(
 				match eff.type:
 					RuneEffect.RuneEffectType.ADD_MULTIPLIER:
 						turn_mul += eff.value
-						turn_mult_updated.emit(turn_mul)
 					RuneEffect.RuneEffectType.MULT_MULTIPLIER:
 						turn_mul *= eff.value
-						turn_mult_updated.emit(turn_mul)
 
 	score_calculation_complete.emit(turn_pts, turn_mul, true)
 
@@ -107,10 +105,11 @@ func _score_word(
 
 		if tile_pts > 0:
 			word_pts += tile_pts
-			turn_score_updated.emit(turn_in_pts + word_pts)
 		
-		add_child(DisappearingLabel.new("+%d" % tile_pts, tile.global_position))
-
+		var label = DisappearingLabel.new("+%d" % tile_pts, tile.global_position)
+		add_child(label)
+		turn_score_updated.emit(label, turn_in_pts + word_pts)
+		
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 
@@ -135,18 +134,23 @@ func _score_word(
 						mult_changed = true
 						
 				if score_changed:
-					turn_score_updated.emit(turn_in_pts + eff.value)
+					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
+					node.add_child(label)
+					turn_score_updated.emit(label, turn_in_pts)
 				if mult_changed:
-					turn_mult_updated.emit(turn_in_mul + eff.value)
+					node.add_child(label)
+					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
+					turn_mult_updated.emit(label)
+					
+					
 
 					
-				if eff.exclamation != "":
-					node.add_child(DisappearingLabel.new(eff.exclamation, node.global_position, true))
 				if score_changed or mult_changed:
 					node.ding()
 					AudioStreamManager.play_good_sound(pitch)
 					pitch += STEP
 					tile.animate_score()
+					
 				await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 				
 		idx += 1

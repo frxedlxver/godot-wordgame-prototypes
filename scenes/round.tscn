@@ -25,7 +25,7 @@ round_ui = NodePath("Round UI")
 [node name="Bag" parent="." instance=ExtResource("4_3w6v7")]
 
 [node name="Board" parent="." instance=ExtResource("5_tm448")]
-position = Vector2(0, -500)
+position = Vector2(-3, -498)
 
 [node name="DebugShape" type="CollisionShape2D" parent="Board"]
 shape = SubResource("RectangleShape2D_wspnp")
@@ -33,19 +33,21 @@ shape = SubResource("RectangleShape2D_wspnp")
 [node name="Hand" parent="." instance=ExtResource("6_x02pj")]
 position = Vector2(0, 196)
 
-[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("turn_score_label", "turn_total_label", "required_score_label", "mult_label", "total_score_label", "bag_ui")]
+[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("points_label", "turn_total_label", "required_score_label", "mult_label", "total_score_label", "bag_ui", "plays_label", "muligans_label")]
 layout_mode = 3
 anchors_preset = 0
 offset_left = -400.0
-offset_right = -360.0
-offset_bottom = 40.0
+offset_right = -400.0
+mouse_filter = 2
 script = ExtResource("2_ie7ca")
-turn_score_label = NodePath("VBoxContainer/TurnScoreArea/Points/Amount")
-turn_total_label = NodePath("VBoxContainer/HBoxContainer/Label2")
-required_score_label = NodePath("ScoreContainer/RequiredScore/Amount")
+points_label = NodePath("VBoxContainer/TurnScoreArea/Points/Amount")
+turn_total_label = NodePath("VBoxContainer/ScoreContainer/Turn Total/Amount")
+required_score_label = NodePath("VBoxContainer/ScoreContainer/RequiredScore/Amount")
 mult_label = NodePath("VBoxContainer/TurnScoreArea/Mult/Amount")
-total_score_label = NodePath("ScoreContainer/TotalScore/Amount")
+total_score_label = NodePath("VBoxContainer/ScoreContainer/TotalScore/Amount")
 bag_ui = NodePath("BagUI")
+plays_label = NodePath("VBoxContainer/ScoreContainer/Plays/Amount")
+muligans_label = NodePath("VBoxContainer/ScoreContainer/Mulligans/Amount")
 
 [node name="BagUI" parent="Round UI" instance=ExtResource("3_istxk")]
 layout_mode = 0
@@ -67,22 +69,6 @@ offset_left = -481.0
 offset_top = -132.0
 offset_right = -173.0
 offset_bottom = -32.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Round UI/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 3
-
-[node name="Label" type="Label" parent="Round UI/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Turn Total: "
-label_settings = ExtResource("4_ywbev")
-
-[node name="Label2" type="Label" parent="Round UI/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(192, 0)
-layout_mode = 2
-text = "0"
-label_settings = ExtResource("4_ywbev")
 
 [node name="TurnScoreArea" type="HBoxContainer" parent="Round UI/VBoxContainer"]
 layout_mode = 2
@@ -144,27 +130,23 @@ label_settings = ExtResource("4_ywbev")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ScoreContainer" type="VBoxContainer" parent="Round UI"]
-layout_mode = 0
-offset_left = -419.0
-offset_top = -33.0
-offset_right = -244.0
-offset_bottom = 95.0
+[node name="ScoreContainer" type="VBoxContainer" parent="Round UI/VBoxContainer"]
+layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="RequiredScore" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+[node name="Turn Total" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Round UI/ScoreContainer/RequiredScore"]
+[node name="Label" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Turn Total"]
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 1
-text = "Required: "
+text = "TurnTotal:"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Amount" type="Label" parent="Round UI/ScoreContainer/RequiredScore"]
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Turn Total"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -172,10 +154,10 @@ text = "0"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="TotalScore" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+[node name="TotalScore" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Round UI/ScoreContainer/TotalScore"]
+[node name="Label" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/TotalScore"]
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 1
@@ -183,7 +165,7 @@ text = "Total: "
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Amount" type="Label" parent="Round UI/ScoreContainer/TotalScore"]
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/TotalScore"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -191,10 +173,29 @@ text = "0"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Plays" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+[node name="RequiredScore" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Round UI/ScoreContainer/Plays"]
+[node name="Label" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/RequiredScore"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+text = "Required: "
+label_settings = ExtResource("4_ywbev")
+vertical_alignment = 1
+
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/RequiredScore"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "0"
+label_settings = ExtResource("4_ywbev")
+vertical_alignment = 1
+
+[node name="Plays" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Plays"]
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 1
@@ -202,7 +203,7 @@ text = "Plays:"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Amount" type="Label" parent="Round UI/ScoreContainer/Plays"]
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Plays"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -210,14 +211,14 @@ text = "0"
 label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
-[node name="Mulligans" type="HBoxContainer" parent="Round UI/ScoreContainer"]
+[node name="Mulligans" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="Round UI/ScoreContainer/Mulligans"]
+[node name="TextureRect" type="TextureRect" parent="Round UI/VBoxContainer/ScoreContainer/Mulligans"]
 layout_mode = 2
 texture = ExtResource("9_b6fnw")
 
-[node name="Amount" type="Label" parent="Round UI/ScoreContainer/Mulligans"]
+[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Mulligans"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1

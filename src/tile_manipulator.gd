@@ -17,7 +17,6 @@ func clear_registrations():
 func _process(delta: float) -> void:
 	if _active_tile:
 		_active_tile.global_position = get_global_mouse_position()
-		print(_active_tile.get_parent().name)
 
 # call for every tile you spawn
 func register_tile(tile : GameTile) -> void:

@@ -7,7 +7,7 @@ var round : Round
 	
 func start():
 	G.current_run = self
-	G.current_run_data.runes = [VowelPower.new(), TheVoid.new(), Singles.new()]
+	G.current_run_data.runes = []
 	rune_manager._load_visuals()
 	rune_manager.position = Vector2(get_viewport_rect().size.x / 2, 32)
 	start_next_round()
@@ -19,6 +19,6 @@ func start_next_round():
 	var next_round_score = (G.current_run_data.last_round_won + 1) * 100
 	round.initialize(G.current_run_data.tile_bag, next_round_score)
 	
-func _on_round_finished():
+func _on_round_finished(won : bool):
 	round.end()
 	round = null

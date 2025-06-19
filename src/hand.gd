@@ -156,10 +156,7 @@ func _tile_is_over_hand(tile : GameTile) -> bool:
 
 func _on_area_entered(area : Area2D) -> void:
 	var tile := area.get_parent()
-	if tile is GameTile and tile.state in [
-		GameTile.TileState.GRABBED_FROM_HAND,
-		GameTile.TileState.GRABBED_FROM_BOARD
-	]:
+	if tile is GameTile and tile.state == GameTile.TileState.GRABBED:
 		start_preview(tile)              # show live gap
 
 func _on_area_exited(area : Area2D) -> void:
