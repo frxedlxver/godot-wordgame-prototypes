@@ -15,10 +15,26 @@ func start():
 func start_next_round():
 	round = round_scene.instantiate()
 	round.finished.connect(_on_round_finished)
+	round.phase_finished.connect(_on_phase_finished)
 	self.add_child(round)
 	var next_round_score = (G.current_run_data.last_round_won + 1) * 100
-	round.initialize(G.current_run_data.tile_bag, next_round_score)
+	var next_round = RunTable.default_run[G.current_run_data.last_round_won]
+	round.initialize(G.current_run_data.tile_bag, next_round)
 	
 func _on_round_finished(won : bool):
+	G.current_run_data.last_round_won += 1
 	round.end()
 	round = null
+	if won:
+		start_next_round()
+	else:
+		game_over()
+		
+func _on_phase_finished(won : bool):
+	if won:
+		round.start_next_phase()
+	else:
+		game_over()
+		
+func game_over():
+	round.queue_free()

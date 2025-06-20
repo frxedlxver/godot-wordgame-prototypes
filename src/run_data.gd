@@ -18,7 +18,6 @@ func start_new_run(seed : String = "") -> void:
 	reinitialize()
 	if seed == "":
 		seed = _generate_random_seed()
-
 	rng_seed  = seed          # ← FIX ① assign it
 	rng_state = 0             # ← FIX ② clear state
 	in_progress = true

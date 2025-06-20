@@ -48,10 +48,24 @@ func score_turn(
 	var pitch : float = 0.0
 	for w in words:
 		var res := await _score_word(w, pitch, turn_pts, turn_mul, board_tiles)
+		
+					
 
+		
 		turn_pts = res.turn_pts
 		turn_mul = res.turn_mul
 		pitch   += w["text"].length() * 0.04
+
+		for pos : Vector2i in w["tiles"]:
+			var tile : GameTile = board_tiles[pos.y][pos.x]
+			tile.animate_score()
+			turn_mul += 1
+			var label = _spawn_score_label("+1x", tile.global_position)
+			turn_mult_updated.emit(label, turn_mul)
+		
+		AudioStreamManager.play_good_sound(pitch)
+		pitch += 0.04
+		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS)
 		
 		var word_ctx = {
 			"word" : w["text"],
@@ -79,7 +93,6 @@ func _score_word(
 ) -> Dictionary:
 
 	var word_pts : int = 0
-	var word_mul : int = 1
 	var idx      : int = 0
 	var pitch    : float = start_pitch
 	const STEP   : float = 0.04
@@ -105,11 +118,10 @@ func _score_word(
 
 		if tile_pts > 0:
 			word_pts += tile_pts
+
 		
-		var label = DisappearingLabel.new("+%d" % tile_pts, tile.global_position)
-		add_child(label)
+		var label = _spawn_score_label(str(tile_pts), tile.global_position)
 		turn_score_updated.emit(label, turn_in_pts + word_pts)
-		
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 
@@ -142,9 +154,6 @@ func _score_word(
 					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
 					turn_mult_updated.emit(label)
 					
-					
-
-					
 				if score_changed or mult_changed:
 					node.ding()
 					AudioStreamManager.play_good_sound(pitch)
@@ -160,6 +169,11 @@ func _score_word(
 		"turn_pts" : turn_in_pts + word_pts,
 		"turn_mul" : turn_in_mul
 	}
+
+func _spawn_score_label(text : String, pos : Vector2, parent : Node = self) -> DisappearingLabel:
+	var lbl = DisappearingLabel.new(text, pos)
+	parent.add_child(lbl)
+	return lbl
 
 # ─────────────────── positional validation helpers ─────────────────────────
 func _tiles_form_single_line(text:Array, new_tiles:Array) -> bool:
