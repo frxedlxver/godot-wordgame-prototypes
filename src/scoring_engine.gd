@@ -5,7 +5,7 @@ extends Node          # Autoload
 
 const TIME_BETWEEN_ANIMATIONS = 0.2
 
-signal turn_score_updated(label : DisappearingLabel, new_score : int)
+signal points_updated(label : DisappearingLabel, new_score : int)
 signal turn_mult_updated(label : DisappearingLabel, new_mult : int)
 signal score_calculation_complete(points:int, mult:int)
 
@@ -65,7 +65,7 @@ func score_turn(
 		
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += 0.04
-		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS)
+		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 		
 		var word_ctx = {
 			"word" : w["text"],
@@ -121,7 +121,7 @@ func _score_word(
 
 		
 		var label = _spawn_score_label(str(tile_pts), tile.global_position)
-		turn_score_updated.emit(label, turn_in_pts + word_pts)
+		points_updated.emit(label, turn_in_pts + word_pts)
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 
@@ -148,7 +148,7 @@ func _score_word(
 				if score_changed:
 					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
 					node.add_child(label)
-					turn_score_updated.emit(label, turn_in_pts)
+					points_updated.emit(label, turn_in_pts)
 				if mult_changed:
 					node.add_child(label)
 					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)

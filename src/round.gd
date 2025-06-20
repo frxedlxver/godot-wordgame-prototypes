@@ -8,21 +8,17 @@ extends Node2D
 @export var round_ui : RoundUI
 
 # ──────────────────────────── round-state (auto-updates UI) ────────────────
-var _turn_score		: int = 0
-var turn_score		: int:
+var _points		: int = 0
+var points		: int:
 	set(v):
-		_turn_score = v
-		if round_ui:
-			round_ui.update_turn_score(_turn_score)
+		_points = v
 	get:
-		return _turn_score
+		return _points
 
 var _total_score	: int = 0
 var total_score		: int:
 	set(v):
 		_total_score = v
-		if round_ui:
-			round_ui.update_total_score(_total_score)
 	get:
 		return _total_score
 
@@ -39,8 +35,6 @@ var _mult			: int = 1
 var mult			: int:
 	set(v):
 		_mult = v
-		if round_ui:
-			round_ui.update_mult(_mult)
 	get:
 		return _mult
 
@@ -83,7 +77,7 @@ func initialize(bag_data : Array[GameTileData], round_config : RunTable.RoundCfg
 	board.slot_unhighlighted.connect(func(_slot): highlighted_board_slot = null)
 
 	# scoring engine hooks
-	SCORING_ENGINE.turn_score_updated.connect(on_turn_score_updated)
+	SCORING_ENGINE.points_updated.connect(on_points_updated)
 	SCORING_ENGINE.turn_mult_updated.connect(on_mult_changed)
 
 	# hand / bag ui
@@ -158,7 +152,7 @@ func play_tiles() -> void:
 	var points		: int = result[0]
 	var mult_val	: int = result[1]
 
-	turn_score = points
+	points = points
 	mult       = mult_val
 	await on_scoring_complete()
 
@@ -171,6 +165,8 @@ func start_next_phase():
 		current_phase = round_cfg.boss
 
 	total_score     = 0
+	round_ui.update_total_score(total_score)
+	
 	required_score  = current_phase.required_score
 	plays           = G.current_run_data.plays_per_round
 	mulligans       = G.current_run_data.mulls_per_round
@@ -184,8 +180,8 @@ func _refill_hand() -> void:
 		await get_tree().create_timer(0.1).timeout
 
 # ───────────────────────────── board → ui hooks ───────────────────────────
-func on_turn_score_updated(label : DisappearingLabel, new_score : int) -> void:
-	turn_score = new_score
+func on_points_updated(label : DisappearingLabel, new_score : int) -> void:
+	points = new_score
 	round_ui.send_label_to_score(label, new_score)
 
 func on_mult_changed(label : DisappearingLabel, new_mult : int) -> void:
@@ -194,10 +190,15 @@ func on_mult_changed(label : DisappearingLabel, new_mult : int) -> void:
 
 func on_scoring_complete() -> void:
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
-	var turn_total = turn_score * mult
+	var turn_total = points * mult
+	reset_points_and_mult()
 	round_ui.update_turn_total(turn_total)
+	AudioStreamManager.play_turn_total()
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
 	total_score += turn_total
+	round_ui.update_turn_total(0)
+	round_ui.update_total_score(total_score)
+	AudioStreamManager.play_round_total()
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
 
 	# determine win / lose
@@ -212,9 +213,11 @@ func on_scoring_complete() -> void:
 		start_new_turn()
 
 func start_new_turn():
-	round_ui.update_turn_total(0)
-	turn_score = 0
-	mult       = 1
-
 	_refill_hand()
 	_scoring_in_progress = false
+	
+func reset_points_and_mult():
+	points = 0
+	round_ui.update_points(points)
+	mult = 1
+	round_ui.update_mult(mult)

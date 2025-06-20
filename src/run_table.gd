@@ -17,13 +17,13 @@ static var default_run : Array = [
 	# ROUND 1
 	RoundCfg.new(
 		PhaseCfg.new(
-			25, false, 3, ""
+			50, false, 3, ""
 		),
 		PhaseCfg.new(
-			50, false, 5, ""
+			100, false, 5, ""
 		),
 		PhaseCfg.new(
-			100, true, 10, ""
+			175, true, 10, ""
 		)
 	),
 	# ROUND 2

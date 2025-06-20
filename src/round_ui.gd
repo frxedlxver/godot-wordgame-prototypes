@@ -41,7 +41,7 @@ func _pop_tween(node : Node) -> void:
 	
 	var tween := create_tween()
 	# “Out” overshoot, then back to normal – quick and subtle.
-	tween.tween_property(node, "scale", Vector2(1.25, 1.25), 0.1)\
+	tween.tween_property(node, "scale", Vector2(1.25, 1.25), 0.02)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(node, "scale", Vector2.ONE, 0.08)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
@@ -50,7 +50,7 @@ func _pop_tween(node : Node) -> void:
 # ────────────────────────────────────────────────────────────────
 # Public update helpers that reuse the internal setter
 # ────────────────────────────────────────────────────────────────
-func update_turn_score(new_score : int) -> void:
+func update_points(new_score : int) -> void:
 	_set_label_text(points_label, new_score)
 
 
@@ -76,7 +76,7 @@ func send_label_to_score(label : DisappearingLabel, amount : int):
 	var target_pos = points_label.global_position
 	label.disappear_to(target_pos)
 	await  label.at_target_position
-	update_turn_score(amount)
+	update_points(amount)
 	
 func send_label_to_mult(label : DisappearingLabel, amount : int):
 	var target_pos = mult_label.global_position

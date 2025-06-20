@@ -11,10 +11,14 @@ rune_manager = NodePath("CanvasLayer/PanelContainer/MarginContainer/RuneManager"
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
-offset_left = 352.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
 offset_top = 32.0
-offset_right = 608.0
+offset_right = 128.0
 offset_bottom = 80.0
+grow_horizontal = 2
 pivot_offset = Vector2(128, 24)
 theme = ExtResource("2_f0gf3")
 theme_type_variation = &"RuneDisplayPanel"
