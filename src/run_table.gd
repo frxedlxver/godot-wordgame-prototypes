@@ -16,31 +16,15 @@ class RoundCfg:
 static var default_run : Array = [
 	# ROUND 1
 	RoundCfg.new(
-		PhaseCfg.new(
-			50, false, 3, ""
-		),
-		PhaseCfg.new(
-			100, false, 5, ""
-		),
-		PhaseCfg.new(
-			175, true, 10, ""
-		)
+		PhaseCfg.new(50, false, 3, ""),
+		PhaseCfg.new(100, false, 5, ""),
+		PhaseCfg.new(175, true, 10, "")
 	),
 	# ROUND 2
 	RoundCfg.new(
-		PhaseCfg.new(
-			75, false, 3, ""
-		),
-		PhaseCfg.new(
-			125, false, 5, ""
-		),
-		PhaseCfg.new(
-			300, true, 10, ""
-		)
-	),
-	
-	
-
-
+		PhaseCfg.new(300, false, 3, ""),
+		PhaseCfg.new(500, false, 5, ""),
+		PhaseCfg.new(1000, true, 10, "")
+	)
 	# … add six more rounds …
 ]

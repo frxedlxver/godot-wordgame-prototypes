@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bxqpqcgv16ilw"]
 
-[ext_resource type="Script" path="res://src/main_menu.gd" id="1_rxdep"]
+[ext_resource type="Script" uid="uid://bam8r1nfnc4cn" path="res://src/main_menu.gd" id="1_rxdep"]
 [ext_resource type="PackedScene" uid="uid://ck15ygb3lk4vv" path="res://scenes/main_menu_button.tscn" id="1_yr5ea"]
 [ext_resource type="LabelSettings" uid="uid://ds2vvbrnjbcj6" path="res://styles/button_label_settings.tres" id="2_exjof"]
 

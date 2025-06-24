@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bnn8qx884e7c2"]
 
 [ext_resource type="Theme" uid="uid://dvrrkdj1rv0l6" path="res://styles/main_theme.tres" id="1_4lef2"]
-[ext_resource type="Script" path="res://src/definition_panel.gd" id="2_xbixt"]
+[ext_resource type="Script" uid="uid://dnkie4v2r2krx" path="res://src/definition_panel.gd" id="2_xbixt"]
 
 [node name="DefinitionPanel" type="PanelContainer"]
 offset_right = 126.0

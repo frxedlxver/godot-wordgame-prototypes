@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dhbnxd5tvuybp"]
 
-[ext_resource type="Script" path="res://src/hand.gd" id="1_16fej"]
+[ext_resource type="Script" uid="uid://seef2tyqmb0k" path="res://src/hand.gd" id="1_16fej"]
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_gnais"]
 size = Vector2(320, 32)

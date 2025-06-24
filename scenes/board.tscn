@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b4qjmxvgj453p"]
 
-[ext_resource type="Script" path="res://src/board.gd" id="1_d21dy"]
+[ext_resource type="Script" uid="uid://bplrh7v2d05n3" path="res://src/board.gd" id="1_d21dy"]
 [ext_resource type="PackedScene" uid="uid://imys0a2abki" path="res://scenes/slot.tscn" id="2_ur6n5"]
 
 [node name="Board" type="Node2D"]
