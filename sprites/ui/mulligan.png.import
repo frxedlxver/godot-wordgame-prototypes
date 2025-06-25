@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b0gq6smq4rl6l"
-path="res://.godot/imported/total.png-11e136197990c6245c364af34988af94.ctex"
+uid="uid://br84r2qlenp3a"
+path="res://.godot/imported/mulligan.png-a3c52b673a815739acbb9e2ed6a29af4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/total.png"
-dest_files=["res://.godot/imported/total.png-11e136197990c6245c364af34988af94.ctex"]
+source_file="res://sprites/ui/mulligan.png"
+dest_files=["res://.godot/imported/mulligan.png-a3c52b673a815739acbb9e2ed6a29af4.ctex"]
 
 [params]
 

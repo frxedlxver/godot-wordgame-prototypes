@@ -16,7 +16,7 @@ var _preview_tile	: GameTile = null			# tile currently hovered over hand
 
 # ─────────────────────────────── signals ────────────────────────────────
 # (hand no longer emits tile_grabbed / tile_released – manipulator handles that)
-signal tile_placed(GameTile, Slot)				# still useful for other systems
+signal tile_placed(GameTile, SlotNode)				# still useful for other systems
 
 # ─────────────────────────────── lifecycle ────────────────────────────────
 func _ready() -> void:
@@ -181,7 +181,7 @@ func _dedupe_and_prune_tiles() -> void:
 	game_tiles = cleaned
 
 # ───────────────────── slot query (used by manipulator) ────────────────────
-func get_highlighted_slot() -> Slot:
+func get_highlighted_slot() -> SlotNode:
 	var params = PhysicsPointQueryParameters2D.new()
 	params.position		   = get_global_mouse_position()
 	params.collide_with_areas = true
@@ -189,6 +189,6 @@ func get_highlighted_slot() -> Slot:
 	var hits = get_world_2d().direct_space_state.intersect_point(params)
 	for h in hits:
 		var owner = h.collider.get_parent()
-		if owner is Slot:
+		if owner is SlotNode:
 			return owner if owner.empty() else null
 	return null

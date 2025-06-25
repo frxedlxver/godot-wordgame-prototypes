@@ -10,8 +10,8 @@ const HALF_IDX    : Vector2i = (BOARD_SIZE - Vector2i.ONE) / 2
 @export var slot_scene : PackedScene
 
 # ──────────────────────────── public signals (ui) ───────────────────────────
-signal slot_highlighted(Slot)
-signal slot_unhighlighted(Slot)
+signal slot_highlighted(SlotNode)
+signal slot_unhighlighted(SlotNode)
 
 # ───────────────────────── internal state (visual) ──────────────────────────
 var board_state      : Array[Array]               = []   # SlotTileStruct grid
@@ -25,14 +25,15 @@ var _word_defs     : Dictionary = {}             # "APPLE" → Definition
 
 # ---------------------------------------------------------------------------
 class SlotTileStruct:
-	var slot : Slot
+	var slot : SlotNode
 	var tile : GameTile
-	func _init(p_slot : Slot = null, p_tile : GameTile = null) -> void:
+	func _init(p_slot : SlotNode = null, p_tile : GameTile = null) -> void:
 		slot = p_slot
 		tile = p_tile
 
 # ─────────────────────────────── lifecycle ─────────────────────────────────
 func _ready() -> void:
+	var center_slot_coords : Vector2i = Vector2i(BOARD_SIZE / 2)
 	for y in range(BOARD_SIZE.y):
 		board_state.append([])
 		board_text.append([])
@@ -42,8 +43,16 @@ func _ready() -> void:
 			board_state[y].append(SlotTileStruct.new())
 			board_text[y].append("")
 			placed_mask[y].append(false)
-
-			var slot = slot_scene.instantiate() as Slot
+			
+			var slot = slot_scene.instantiate() as SlotNode
+			
+			# set slot type here
+			if Vector2i(x, y) == center_slot_coords:
+				slot.slot_info = CenterSlot.new()
+			else:
+				slot.slot_info = NormalSlot.new()
+				
+				
 			add_child(slot)
 			slot.position    = (Vector2i(x, y) - HALF_IDX) * SLOT_SIZE
 			slot.coordinates = Vector2i(x, y)
@@ -51,6 +60,8 @@ func _ready() -> void:
 
 			slot.highlighted.connect(_slot_highlighted)
 			slot.unhighlighted.connect(_slot_unhighlighted)
+			
+
 
 func _process(_dt : float) -> void:
 	if show_defs_held:
@@ -66,22 +77,35 @@ func _process(_dt : float) -> void:
 		#_hover_coord = Vector2i(-1, -1)
 		#hide_definition_panel()
 
+func get_non_locked_tiles() -> Array[GameTile]:
+	# Collect every tile that is present on the board and **not** locked in
+	var result : Array[GameTile] = []
+	for y in range(BOARD_SIZE.y):
+		for x in range(BOARD_SIZE.x):
+			if not placed_mask[y][x]:
+				var tile : GameTile = board_state[y][x].tile
+				if tile:
+					result.append(tile)
+	return result
 # ─────────────────────── public interface for Game Flow ─────────────────────
 func get_turn_snapshot() -> Dictionary:
 	var new_tiles : Array[Vector2i] = _get_current_turn_tiles()
 
 	# build a parallel grid of GameTile refs (or null)
 	var tiles_grid : Array = []
+	var slots : Array = []
 	for y in range(BOARD_SIZE.y):
 		tiles_grid.append([])
+		slots.append([])
 		for x in range(BOARD_SIZE.x):
 			tiles_grid[y].append(board_state[y][x].tile)
-
+			slots[y].append(board_state[y][x].slot)
 	return {
-		"board_text"  : board_text,
-		"board_tiles" : tiles_grid,
-		"placed_mask" : placed_mask,
-		"new_tiles"   : new_tiles
+		"board_text"	: board_text,
+		"board_tiles"	: tiles_grid,
+		"placed_mask"	: placed_mask,
+		"new_tiles"		: new_tiles,
+		"slots"			: slots
 	}
 
 func commit_turn(new_tiles : Array[Vector2i]) -> void:
@@ -101,7 +125,7 @@ func commit_turn(new_tiles : Array[Vector2i]) -> void:
 				tile.return_to_hand.disconnect(remove_tile)
 
 # ─────────────────────────── tile manipulation ─────────────────────────────
-func can_place_at(target_slot : Slot) -> bool:
+func can_place_at(target_slot : SlotNode) -> bool:
 	return not placed_mask[target_slot.coordinates.y][target_slot.coordinates.x]
 
 func can_pick_up(tile : GameTile) -> bool:
@@ -109,7 +133,7 @@ func can_pick_up(tile : GameTile) -> bool:
 		return true
 	return not placed_mask[tile.coordinates.y][tile.coordinates.x]
 
-func place_tile_at(tile : GameTile, target_slot : Slot) -> void:
+func place_tile_at(tile : GameTile, target_slot : SlotNode) -> void:
 
 	var dest      = board_state[target_slot.coordinates.y][target_slot.coordinates.x]
 	var displaced = dest.tile
@@ -124,7 +148,7 @@ func place_tile_at(tile : GameTile, target_slot : Slot) -> void:
 	if not tile.return_to_hand.is_connected(remove_tile):
 		tile.return_to_hand.connect(remove_tile)
 
-	var origin_slot : Slot = null
+	var origin_slot : SlotNode = null
 	if tile.coordinates != -Vector2i.ONE:
 		origin_slot = board_state[tile.coordinates.y][tile.coordinates.x].slot
 
@@ -166,7 +190,7 @@ func remove_tile(tile : GameTile) -> void:
 	if tile.state == GameTile.TileState.IDLE:
 		tile.coordinates = -Vector2i.ONE
 
-func _snap_tile_to_slot(tile : GameTile, slot : Slot) -> void:
+func _snap_tile_to_slot(tile : GameTile, slot : SlotNode) -> void:
 	var tw = create_tween()
 	tw.tween_property(tile, "global_position", slot.global_position, 0.1)
 	tw.set_ease(Tween.EASE_IN)
@@ -237,5 +261,5 @@ func debug_print_board() -> void:
 	print(s)
 
 # ───────────────────────── slot highlight relays ───────────────────────────
-func _slot_highlighted(s : Slot) -> void:	slot_highlighted.emit(s)
-func _slot_unhighlighted(s : Slot) -> void:	slot_unhighlighted.emit(s)
+func _slot_highlighted(s : SlotNode) -> void:	slot_highlighted.emit(s)
+func _slot_unhighlighted(s : SlotNode) -> void:	slot_unhighlighted.emit(s)

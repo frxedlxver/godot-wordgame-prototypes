@@ -11,7 +11,15 @@ extends Control
 @export var bag_ui				: BagUI
 @export var plays_label			: Label
 @export var muligans_label		: Label
+@export var mulligan_button		: TextureButton
+@export var play_button			: TextureButton
 
+signal play_requested
+signal mulligan_requested
+
+func _ready():
+	mulligan_button.pressed.connect(_mulligan_button_pressed)
+	play_button.pressed.connect(_play_button_pressed)
 
 func animate_in() -> void:
 	self.show()
@@ -89,3 +97,27 @@ func update_plays(new_count : int):
 	
 func update_mulligans(new_count : int):
 	muligans_label.text = str(new_count)
+
+func _mulligan_button_pressed():
+	mulligan_requested.emit()
+
+func _play_button_pressed():
+	play_requested.emit()
+
+func hide_buttons():
+	play_button.set_process_input(false)
+	mulligan_button.set_process_input(false)
+	play_button.visible = false
+	mulligan_button.visible = false
+	
+func show_buttons():
+	play_button.set_process_input(true)
+	mulligan_button.set_process_input(true)
+	play_button.visible = true
+	mulligan_button.visible = true
+
+func disable_mulligan_button():
+	mulligan_button.disabled = true
+	
+func enable_mulligan_button():
+	mulligan_button.disabled = false

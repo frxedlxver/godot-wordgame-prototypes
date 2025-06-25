@@ -3,7 +3,7 @@
 class_name ScoringEngine
 extends Node          # Autoload
 
-const TIME_BETWEEN_ANIMATIONS = 0.2
+const TIME_BETWEEN_ANIMATIONS = 0.4
 
 signal points_updated(label : DisappearingLabel, new_score : int)
 signal turn_mult_updated(label : DisappearingLabel, new_mult : int)
@@ -34,10 +34,11 @@ func validate_turn(
 	
 # ───────────────────────  public entry  ─────────────────────────────────────
 func score_turn(
-		board_text   : Array,      # Array[Array[String]]
-		board_tiles  : Array,      # Array[Array[GameTile]]
-		placed_mask  : Array,      # Array[Array[bool]]
-		new_tiles    : Array       # Array[Vector2i]
+		board_text	: Array,	# Array[Array[String]]
+		board_tiles	: Array,	# Array[Array[GameTile]]
+		placed_mask	: Array,	# Array[Array[bool]]
+		new_tiles	: Array,	# Array[Vector2i]
+		slots		: Array		# Array[SlotNode]
 ) -> void:
 
 	var turn_pts : int = 0
@@ -47,21 +48,11 @@ func score_turn(
 	# 2. score each word (plays SFX & tweens inline) -------------------------
 	var pitch : float = 0.0
 	for w in words:
-		var res := await _score_word(w, pitch, turn_pts, turn_mul, board_tiles)
-		
-					
-
+		var res := await _score_word(w, pitch, turn_pts, turn_mul, board_tiles, slots)
 		
 		turn_pts = res.turn_pts
 		turn_mul = res.turn_mul
 		pitch   += w["text"].length() * 0.04
-
-		for pos : Vector2i in w["tiles"]:
-			var tile : GameTile = board_tiles[pos.y][pos.x]
-			tile.animate_score()
-			turn_mul += 1
-			var label = _spawn_score_label("+1x", tile.global_position)
-			turn_mult_updated.emit(label, turn_mul)
 		
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += 0.04
@@ -85,11 +76,12 @@ func score_turn(
 
 # ───────────────────────  word scoring  ────────────────────────────────────
 func _score_word(
-		word_info    : Dictionary,      # { text:String, tiles:Array[Vector2i] }
-		start_pitch  : float,
-		turn_in_pts  : int,
-		turn_in_mul  : int,
-		board_tiles  : Array            # GameTile grid
+		word_info		: Dictionary,      # { text:String, tiles:Array[Vector2i] }
+		start_pitch		: float,
+		turn_in_pts		: int,
+		turn_in_mul		: int,
+		board_tiles		: Array,            # GameTile grid
+		slots			: Array
 ) -> Dictionary:
 
 	var word_pts : int = 0
@@ -118,8 +110,8 @@ func _score_word(
 
 		if tile_pts > 0:
 			word_pts += tile_pts
-
-		
+		turn_in_mul += 1
+		turn_mult_updated.emit(null, turn_in_mul)
 		var label = _spawn_score_label(str(tile_pts), tile.global_position)
 		points_updated.emit(label, turn_in_pts + word_pts)
 		AudioStreamManager.play_good_sound(pitch)
@@ -127,6 +119,22 @@ func _score_word(
 
 		tile.animate_score()			# tween runs, yields until finished
 		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
+		
+		var slot : SlotNode = slots[pos.y][pos.x]
+		var slot_effect : SlotEffect = slot.slot_info.get_slot_effect()
+		
+		if slot_effect:
+			match slot_effect.type:
+				SlotEffect.SlotEffectType.MULT_MULT:
+					turn_in_mul *= slot_effect.value
+					label = _spawn_score_label(str("MULT x%d" % slot_effect.value), tile.global_position)
+					turn_mult_updated.emit(label, turn_in_mul)
+					AudioStreamManager.play_good_sound(pitch)
+					pitch += STEP
+					tile.animate_score()
+					await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
+		
+		
 		# --- tile-level rune hooks ----------------------------------------
 		for node : RuneNode in G.current_run.rune_manager.get_runes():
 			for eff : RuneEffect in node.rune.after_tile_scored(ctx):

@@ -1,15 +1,16 @@
-class_name Slot extends Sprite2D
+class_name SlotNode extends Sprite2D
 
-signal highlighted(Slot)
-signal unhighlighted(Slot)
+signal highlighted(SlotNode)
+signal unhighlighted(SlotNode)
 
 var coordinates : Vector2i
 var has_tile : bool = false
+var slot_info : SlotInfo
 
 func _ready() -> void:
 	$Area2D.mouse_entered.connect(_area2d_mouse_entered)
 	$Area2D.mouse_exited.connect(_area2d_mouse_exited)
-	
+	self.texture = slot_info.tex
 func _area2d_mouse_entered():
 	self_modulate = Color8(200, 200, 200, 255);
 	highlighted.emit(self)
@@ -20,3 +21,6 @@ func _area2d_mouse_exited():
 
 func empty():
 	return !has_tile
+	
+func effect():
+	pass

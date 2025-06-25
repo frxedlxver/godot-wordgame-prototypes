@@ -1,15 +1,19 @@
-[gd_scene load_steps=12 format=3 uid="uid://boutt7jysbfio"]
+[gd_scene load_steps=16 format=3 uid="uid://boutt7jysbfio"]
 
 [ext_resource type="Script" uid="uid://ddftis3dxupkk" path="res://src/round.gd" id="1_grh2k"]
 [ext_resource type="Script" uid="uid://bfinnviqdmsgn" path="res://src/round_ui.gd" id="2_ie7ca"]
 [ext_resource type="PackedScene" uid="uid://crpel47irxv8u" path="res://scenes/bag_ui.tscn" id="3_istxk"]
-[ext_resource type="Texture2D" uid="uid://8ufq1tnd3hso" path="res://sprites/points_bar.png" id="4_1s4o2"]
+[ext_resource type="Texture2D" uid="uid://8ufq1tnd3hso" path="res://sprites/ui/points_bar.png" id="4_1s4o2"]
 [ext_resource type="PackedScene" uid="uid://c6ynr0i46i876" path="res://scenes/bag.tscn" id="4_3w6v7"]
 [ext_resource type="LabelSettings" uid="uid://bm22qfiyln1hl" path="res://styles/disappearing_label_settings.tres" id="4_ywbev"]
+[ext_resource type="Texture2D" uid="uid://by8yyi62qjm76" path="res://sprites/ui/play_button_normal.tres" id="5_p5kuw"]
 [ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="5_tm448"]
+[ext_resource type="Texture2D" uid="uid://ct2y82lr866jv" path="res://sprites/ui/play_button_pressed.tres" id="6_h7h1o"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="6_x02pj"]
-[ext_resource type="Texture2D" uid="uid://cg5sfqo6gsh25" path="res://sprites/mult_bar.png" id="7_6qddn"]
-[ext_resource type="Texture2D" uid="uid://br84r2qlenp3a" path="res://sprites/mulligan.png" id="9_b6fnw"]
+[ext_resource type="Texture2D" uid="uid://cg5sfqo6gsh25" path="res://sprites/ui/mult_bar.png" id="7_6qddn"]
+[ext_resource type="Texture2D" uid="uid://h0x0ejtoanhm" path="res://sprites/ui/play_button_hover.tres" id="7_i86cr"]
+[ext_resource type="Texture2D" uid="uid://2jtro6xs4jmx" path="res://sprites/ui/play_button_disabled.tres" id="8_h7h1o"]
+[ext_resource type="Texture2D" uid="uid://br84r2qlenp3a" path="res://sprites/ui/mulligan.png" id="9_b6fnw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wspnp"]
 size = Vector2(306, 306)
@@ -33,7 +37,57 @@ shape = SubResource("RectangleShape2D_wspnp")
 [node name="Hand" parent="." instance=ExtResource("6_x02pj")]
 position = Vector2(0, 196)
 
-[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("points_label", "turn_total_label", "required_score_label", "mult_label", "total_score_label", "bag_ui", "plays_label", "muligans_label")]
+[node name="PlayButton" type="TextureButton" parent="."]
+offset_left = -30.0
+offset_top = 223.0
+offset_right = 34.0
+offset_bottom = 263.0
+texture_normal = ExtResource("5_p5kuw")
+texture_pressed = ExtResource("6_h7h1o")
+texture_hover = ExtResource("7_i86cr")
+texture_disabled = ExtResource("8_h7h1o")
+
+[node name="MulliganButton" type="TextureButton" parent="."]
+offset_left = 101.0
+offset_top = 224.0
+offset_right = 133.0
+offset_bottom = 256.0
+texture_normal = ExtResource("9_b6fnw")
+
+[node name="RemainingMulligans" type="Label" parent="MulliganButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 26.0
+offset_top = -7.0
+offset_right = 35.0
+offset_bottom = 9.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "0"
+label_settings = ExtResource("4_ywbev")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BagUI" parent="." instance=ExtResource("3_istxk")]
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = -160.0
+offset_top = 218.0
+offset_right = -96.0
+offset_bottom = 258.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="Round UI" type="Control" parent="." node_paths=PackedStringArray("points_label", "turn_total_label", "required_score_label", "mult_label", "total_score_label", "bag_ui", "plays_label", "muligans_label", "mulligan_button", "play_button")]
 layout_mode = 3
 anchors_preset = 0
 offset_left = -400.0
@@ -45,23 +99,11 @@ turn_total_label = NodePath("VBoxContainer/ScoreContainer/Turn Total/Amount")
 required_score_label = NodePath("VBoxContainer/ScoreContainer/RequiredScore/Amount")
 mult_label = NodePath("VBoxContainer/TurnScoreArea/Mult/Amount")
 total_score_label = NodePath("VBoxContainer/ScoreContainer/TotalScore/Amount")
-bag_ui = NodePath("BagUI")
+bag_ui = NodePath("../BagUI")
 plays_label = NodePath("VBoxContainer/ScoreContainer/Plays/Amount")
-muligans_label = NodePath("VBoxContainer/ScoreContainer/Mulligans/Amount")
-
-[node name="BagUI" parent="Round UI" instance=ExtResource("3_istxk")]
-layout_mode = 0
-anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = -461.0
-offset_top = 216.0
-offset_right = -397.0
-offset_bottom = 256.0
-grow_horizontal = 1
-grow_vertical = 1
+muligans_label = NodePath("../MulliganButton/RemainingMulligans")
+mulligan_button = NodePath("../MulliganButton")
+play_button = NodePath("../PlayButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Round UI"]
 layout_mode = 0
@@ -204,21 +246,6 @@ label_settings = ExtResource("4_ywbev")
 vertical_alignment = 1
 
 [node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Plays"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-text = "0"
-label_settings = ExtResource("4_ywbev")
-vertical_alignment = 1
-
-[node name="Mulligans" type="HBoxContainer" parent="Round UI/VBoxContainer/ScoreContainer"]
-layout_mode = 2
-
-[node name="TextureRect" type="TextureRect" parent="Round UI/VBoxContainer/ScoreContainer/Mulligans"]
-layout_mode = 2
-texture = ExtResource("9_b6fnw")
-
-[node name="Amount" type="Label" parent="Round UI/VBoxContainer/ScoreContainer/Mulligans"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1

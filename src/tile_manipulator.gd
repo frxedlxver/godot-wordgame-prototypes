@@ -26,6 +26,46 @@ func register_tile(tile : GameTile) -> void:
 		tile.released.connect(_on_tile_released)
 	if not tile.return_to_hand.is_connected(_on_tile_return):
 		tile.return_to_hand.connect(_on_tile_return)
+		
+# 1) Move every tile that is on the BOARD back into the HAND
+func return_board_to_hand() -> void:
+	# Abort if either side isn’t registered
+	if _board == null or _hand == null:
+		return
+	
+	var copy : Array[GameTile] = []
+	for child in _board.get_children():
+		if child is GameTile:
+			copy.append(child)
+
+	for tile in copy:
+		_board.remove_tile(tile)
+		_hand.add_to_hand(tile)
+		tile.set_state(GameTile.TileState.IDLE)	# reset state
+		
+		
+# 2) Move every tile from BOARD **and** HAND into the BAG you supply
+func return_all_to_bag(bag : Bag) -> void:
+	if bag == null:
+		return
+
+	# ----- Board -----------------------------------------------------------
+	if _board:
+		var non_locked_board_tiles = _board.get_non_locked_tiles()
+
+		for tile in non_locked_board_tiles:
+			_board.remove_tile(tile)
+			bag.add_to_bag(tile)
+
+	# ----- Hand ------------------------------------------------------------
+	var hand_copy : Array[GameTile] = []
+	if _hand:
+		for tile in _hand.game_tiles:
+			hand_copy.append(tile)
+
+	for tile in hand_copy:
+		_hand.remove_from_hand(tile)
+		bag.add_to_bag(tile)
 
 # ───────────────────────── signal callbacks ──────────────────────────
 func _on_tile_grabbed(tile : GameTile) -> void:
@@ -48,7 +88,7 @@ func _on_tile_released(tile : GameTile) -> void:
 	tile.z_index = 1
 	_hand.stop_preview()             # <<< remove gap preview
 
-	var dst_slot : Slot = _hand.get_highlighted_slot()
+	var dst_slot : SlotNode = _hand.get_highlighted_slot()
 	# TileManipulator.gd  (inside _on_tile_released)
 	if dst_slot and _board.can_place_at(dst_slot):
 		_hand.remove_from_hand(tile)            #    (unparents from Hand)

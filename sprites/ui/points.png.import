@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://br84r2qlenp3a"
-path="res://.godot/imported/mulligan.png-81d58cabf86169d6415660ac3ac044a4.ctex"
+uid="uid://kiavbt61wsda"
+path="res://.godot/imported/points.png-8923e4d817332ccf89af6997c0667e5a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/mulligan.png"
-dest_files=["res://.godot/imported/mulligan.png-81d58cabf86169d6415660ac3ac044a4.ctex"]
+source_file="res://sprites/ui/points.png"
+dest_files=["res://.godot/imported/points.png-8923e4d817332ccf89af6997c0667e5a.ctex"]
 
 [params]
 

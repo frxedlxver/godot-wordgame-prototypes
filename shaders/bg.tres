@@ -4,9 +4,9 @@
 
 [resource]
 shader = ExtResource("1_nlp4q")
-shader_parameter/color_a = Color(0, 0.52549, 0.756863, 1)
+shader_parameter/color_a = Color(0.319373, 0.1632, 0.34, 1)
 shader_parameter/color_b = Color(0, 0, 0, 1)
-shader_parameter/color_c = Color(0.65, 0.1365, 0.145058, 1)
+shader_parameter/color_c = Color(0.25905, 0.111, 0.3, 1)
 shader_parameter/palette_mix = 1.0
 shader_parameter/quantize_steps = 16
 shader_parameter/zoom = 4.0

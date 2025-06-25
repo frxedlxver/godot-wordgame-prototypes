@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kiavbt61wsda"
-path="res://.godot/imported/points.png-48912957132fcc2a2593090a50a11cbb.ctex"
+uid="uid://bbdn5u4cf23m3"
+path="res://.godot/imported/button_hover.png-097ea9e29d68660117703f81c8765da2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/points.png"
-dest_files=["res://.godot/imported/points.png-48912957132fcc2a2593090a50a11cbb.ctex"]
+source_file="res://sprites/ui/button_hover.png"
+dest_files=["res://.godot/imported/button_hover.png-097ea9e29d68660117703f81c8765da2.ctex"]
 
 [params]
 

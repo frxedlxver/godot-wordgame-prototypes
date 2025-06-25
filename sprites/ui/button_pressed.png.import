@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwvfaeti6digx"
-path="res://.godot/imported/turn.png-d4ccffe90c5ebc977ea6d83400f092c3.ctex"
+uid="uid://daugcolumpnhm"
+path="res://.godot/imported/button_pressed.png-46c512f7e058bd874c37e3f6f7e669ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/turn.png"
-dest_files=["res://.godot/imported/turn.png-d4ccffe90c5ebc977ea6d83400f092c3.ctex"]
+source_file="res://sprites/ui/button_pressed.png"
+dest_files=["res://.godot/imported/button_pressed.png-46c512f7e058bd874c37e3f6f7e669ba.ctex"]
 
 [params]
 

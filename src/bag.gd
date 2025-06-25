@@ -12,7 +12,11 @@ func initialize_from(bag_data : Array[GameTileData]):
 	shuffle()
 
 func add_to_bag(game_tile : GameTile):
+	game_tile.set_state(GameTile.TileState.IDLE)
 	self.game_tiles.append(game_tile)
+	if game_tile.get_parent():
+		game_tile.get_parent().remove_child(game_tile)
+	
 	tile_count_changed.emit(game_tiles.size())
 	
 func shuffle() -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=10 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" uid="uid://bbbbx1l50sf2u" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
@@ -8,6 +8,7 @@
 [ext_resource type="AudioStream" uid="uid://b3mp7yiiwevu3" path="res://sound/33912__necrosensual__aluminum08.wav" id="6_xtmnp"]
 [ext_resource type="AudioStream" uid="uid://6nyle0h0mi6f" path="res://sound/56253__qk__metal_03.wav" id="7_hdxxo"]
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="LabelSettings" uid="uid://bw117o5vg3h1s" path="res://styles/panel_title_label_settings.tres" id="9_uacia"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_kiayv")
@@ -45,3 +46,52 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
+
+[node name="Shop" type="Control" parent="UI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="UI/Shop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/Shop/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Shop/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Shop/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "CHOOSE A REWARD"
+label_settings = ExtResource("9_uacia")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Shop/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="UI/Shop/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(64, 128)
+layout_mode = 2
+size_flags_horizontal = 3

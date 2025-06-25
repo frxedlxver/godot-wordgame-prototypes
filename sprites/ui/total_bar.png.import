@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brm6csyxdnt6s"
-path="res://.godot/imported/button.png-13aac4604de32c9ef5dfd2bf318cd942.ctex"
+uid="uid://d28cewu72nq0t"
+path="res://.godot/imported/total_bar.png-e59bfcad39f3ba7ce253e346a5ae5641.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/button.png"
-dest_files=["res://.godot/imported/button.png-13aac4604de32c9ef5dfd2bf318cd942.ctex"]
+source_file="res://sprites/ui/total_bar.png"
+dest_files=["res://.godot/imported/total_bar.png-e59bfcad39f3ba7ce253e346a5ae5641.ctex"]
 
 [params]
 

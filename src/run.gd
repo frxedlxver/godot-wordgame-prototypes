@@ -4,7 +4,6 @@ var round_scene : PackedScene = preload("res://scenes/round.tscn")
 var round : Round
 @export var rune_manager : RuneManager
 	
-	
 func start():
 	G.current_run = self
 	G.current_run_data.runes = []
@@ -34,7 +33,10 @@ func _on_phase_finished(won : bool):
 	if won:
 		round.start_next_phase()
 	else:
+		round.end()
 		game_over()
 		
 func game_over():
-	round.queue_free()
+	# put more in here later
+	# show a game over screen with run stats. Button to restart, button to return to main menu
+	pass

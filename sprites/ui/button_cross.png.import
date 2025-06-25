@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d28cewu72nq0t"
-path="res://.godot/imported/total_bar.png-6365bcef6cc1863aa3b787cb05de8a7f.ctex"
+uid="uid://ce74dcipjihll"
+path="res://.godot/imported/button_cross.png-591f3dede526e2b952dd0b983912b0a5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/total_bar.png"
-dest_files=["res://.godot/imported/total_bar.png-6365bcef6cc1863aa3b787cb05de8a7f.ctex"]
+source_file="res://sprites/ui/button_cross.png"
+dest_files=["res://.godot/imported/button_cross.png-591f3dede526e2b952dd0b983912b0a5.ctex"]
 
 [params]
 

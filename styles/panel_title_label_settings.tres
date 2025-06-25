@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bw117o5vg3h1s"]
+
+[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://fonts/Minecraft.ttf" id="1_w7i7x"]
+
+[resource]
+font = ExtResource("1_w7i7x")
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)

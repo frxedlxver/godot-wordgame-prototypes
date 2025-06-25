@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://tt0d14btpxdg"
-path="res://.godot/imported/bag.png-143ba5df693a7ba008f6310afd72723e.ctex"
+uid="uid://8ufq1tnd3hso"
+path="res://.godot/imported/points_bar.png-3f5070bf7d007c7cd66715e6b76a0d68.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/bag.png"
-dest_files=["res://.godot/imported/bag.png-143ba5df693a7ba008f6310afd72723e.ctex"]
+source_file="res://sprites/ui/points_bar.png"
+dest_files=["res://.godot/imported/points_bar.png-3f5070bf7d007c7cd66715e6b76a0d68.ctex"]
 
 [params]
 

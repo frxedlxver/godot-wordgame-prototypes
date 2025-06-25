@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dlmie8v4367b0"
-path="res://.godot/imported/game_button_pressed.png-fc6da81d033e0f93ecbcd49d757a0fc0.ctex"
+uid="uid://b0gq6smq4rl6l"
+path="res://.godot/imported/total.png-a95561ba033ddef41be7b902927f0e14.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/game_button_pressed.png"
-dest_files=["res://.godot/imported/game_button_pressed.png-fc6da81d033e0f93ecbcd49d757a0fc0.ctex"]
+source_file="res://sprites/ui/total.png"
+dest_files=["res://.godot/imported/total.png-a95561ba033ddef41be7b902927f0e14.ctex"]
 
 [params]
 
