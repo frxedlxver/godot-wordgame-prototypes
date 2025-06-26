@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://tt0d14btpxdg" path="res://sprites/ui/bag.png" id="1_3b0e7"]
 [ext_resource type="Script" uid="uid://bqfs4njp6vl0" path="res://src/bag_ui.gd" id="2_fb5ma"]
-[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://fonts/Minecraft.ttf" id="2_jca18"]
+[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://misc/fonts/Minecraft.ttf" id="2_jca18"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_lku3e"]
 font = ExtResource("2_jca18")

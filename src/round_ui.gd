@@ -13,6 +13,7 @@ extends Control
 @export var muligans_label		: Label
 @export var mulligan_button		: TextureButton
 @export var play_button			: TextureButton
+@export var round_score_bar		: ProgressBar
 
 signal play_requested
 signal mulligan_requested
@@ -63,10 +64,12 @@ func update_points(new_score : int) -> void:
 
 
 func update_required_score(new_score : int) -> void:
+	round_score_bar.max_value = new_score
 	_set_label_text(required_score_label, new_score)
 
 
 func update_total_score(new_score : int) -> void:
+	round_score_bar.value = new_score
 	_set_label_text(total_score_label, new_score)
 
 

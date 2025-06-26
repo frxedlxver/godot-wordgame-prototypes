@@ -3,7 +3,7 @@
 class_name ScoringEngine
 extends Node          # Autoload
 
-const TIME_BETWEEN_ANIMATIONS = 0.4
+const TIME_BETWEEN_ANIMATIONS = 0.6
 
 signal points_updated(label : DisappearingLabel, new_score : int)
 signal turn_mult_updated(label : DisappearingLabel, new_mult : int)
@@ -52,10 +52,7 @@ func score_turn(
 		
 		turn_pts = res.turn_pts
 		turn_mul = res.turn_mul
-		pitch   += w["text"].length() * 0.04
-		
-		AudioStreamManager.play_good_sound(pitch)
-		pitch += 0.04
+
 		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 		
 		var word_ctx = {
