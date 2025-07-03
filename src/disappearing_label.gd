@@ -23,12 +23,8 @@ func _ready() -> void:
 	tw_scale.tween_property(self, "scale", Vector2.ONE, 0.1)
 	var tween = create_tween()
 	tween.tween_property(self, "global_position", end_pos, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-
-
-func disappear_to(new_position : Vector2):
-	var tw = create_tween()
-	tw.tween_interval(0.3)
-	tw.tween_property(self, "global_position", new_position, 0.2)
-	await tw.finished
-	self.at_target_position.emit()
+	await tween.finished
+	await get_tree().create_timer(0.4).timeout	
+	var tw_col = create_tween()
+	tw_col.tween_property(self, "modulate", Color(1,1,1,0), 0.05)
 	queue_free()

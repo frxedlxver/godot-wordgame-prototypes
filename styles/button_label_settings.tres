@@ -1,7 +1,7 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://ds2vvbrnjbcj6"]
 
-[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://misc/fonts/Minecraft.ttf" id="1_bwynf"]
+[ext_resource type="FontFile" uid="uid://dtibc70p68oq" path="res://misc/fonts/vhs_gothic/vhs-gothic.ttf" id="1_74yrw"]
 
 [resource]
-font = ExtResource("1_bwynf")
+font = ExtResource("1_74yrw")
 font_color = Color(0, 0, 0, 1)

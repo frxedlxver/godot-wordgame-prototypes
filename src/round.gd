@@ -12,6 +12,8 @@ var _points		: int = 0
 var points		: int:
 	set(v):
 		_points = v
+		if round_ui:
+			round_ui.update_points(_points)
 	get:
 		return _points
 
@@ -35,6 +37,8 @@ var _mult			: int = 1
 var mult			: int:
 	set(v):
 		_mult = v
+		if round_ui:
+			round_ui.update_mult(_mult)
 	get:
 		return _mult
 
@@ -96,7 +100,7 @@ func initialize(bag_data : Array[GameTileData], round_config : RunTable.RoundCfg
 func animate_in() -> void:
 	var board_tween = create_tween()
 	var board_target_pos = get_viewport_rect().size / 2
-	board_tween.tween_property(board, "position", board_target_pos, 0.3)
+	board_tween.tween_property(board, "global_position", board_target_pos, 0.3)
 	round_ui.animate_in()
 	
 	while hand.tile_count() < G.current_run_data.max_hand_size and not bag.is_empty():
@@ -108,11 +112,12 @@ func end() -> void:
 
 func animate_out():
 	var board_tween = create_tween()
-	board_tween.tween_property(board, "position", Vector2(0, -500), 0.5)
+	var board_target_pos = get_viewport_rect().size / 2 - Vector2(0, 500)
+	board_tween.tween_property(board, "global_position", board_target_pos, 0.3)
+	TILE_MANIPULATOR.return_all_to_bag(bag, round_ui.bag_ui)
 	await get_tree().create_timer(0.2).timeout
-	var ui_tween = create_tween()
-	ui_tween.tween_property(round_ui, "position", Vector2(-500, 0), 0.5)
-	await ui_tween.finished
+	round_ui.animate_out()
+	
 
 # ───────────────────────────── input handler ──────────────────────────────
 func _unhandled_input(event : InputEvent) -> void:
@@ -155,8 +160,9 @@ func play_tiles() -> void:
 		snap.new_tiles,
 		snap.slots
 	)
-	
+	print("awaiting scoring")
 	var result = await SCORING_ENGINE.score_calculation_complete
+	print("done scoring")
 	var points		: int = result[0]
 	var mult_val	: int = result[1]
 	
@@ -184,23 +190,17 @@ func start_next_phase():
 func _refill_hand() -> void:
 	while hand.tile_count() < G.current_run_data.max_hand_size and not bag.is_empty():
 		var tile = bag.draw_tile()
-		hand.add_to_hand(tile, bag.global_position)
+		hand.add_to_hand(tile, round_ui.bag_ui.global_position)
 		await get_tree().create_timer(0.1).timeout
 
 # ───────────────────────────── board → ui hooks ───────────────────────────
-func on_points_updated(label : DisappearingLabel, new_score : int) -> void:
+func on_points_updated(new_score : int) -> void:
 	points = new_score
-	if label != null:
-		round_ui.send_label_to_score(label, new_score)
-	else:
-		round_ui.update_score(new_score)
+	round_ui.update_points(new_score)
 
-func on_mult_changed(label, new_mult : int) -> void:
+func on_mult_changed(new_mult : int) -> void:
 	mult = new_mult
-	if label != null:
-		round_ui.send_label_to_mult(label, new_mult)
-	else:
-		round_ui.update_mult(new_mult)
+	round_ui.update_mult(new_mult)
 
 func on_scoring_complete() -> void:
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
@@ -209,27 +209,33 @@ func on_scoring_complete() -> void:
 	round_ui.update_turn_total(turn_total)
 	AudioStreamManager.play_turn_total()
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
+	
+	await round_ui.roll_score(turn_total)
 	total_score += turn_total
-	round_ui.update_turn_total(0)
-	round_ui.update_total_score(total_score)
-	AudioStreamManager.play_round_total()
+	turn_total = 0
+	
 	await get_tree().create_timer(SCORING_ENGINE.TIME_BETWEEN_ANIMATIONS * 2).timeout
 	
 	# determine win / lose
 	if total_score >= current_phase.required_score:
+		print("beat req score")
 		if current_phase == round_cfg.boss:
 			finished.emit(true)
 		else:
 			phase_finished.emit(true)
 	elif plays <= 0:
+		print("plays 0")
 		finished.emit(false)
 	else:
+		print("starting new turn")
 		start_new_turn()
 
 func start_new_turn():
 	_refill_hand()
 	_scoring_in_progress = false
 	round_ui.show_buttons()
+	print("new turn started")
+	
 
 func reset_points_and_mult():
 	points = 0
@@ -240,10 +246,10 @@ func reset_points_and_mult():
 func _on_mulligan_requested():
 	if mulligans > 0:
 		mulligans -= 1
-		TILE_MANIPULATOR.return_all_to_bag(bag)
-		
+		await TILE_MANIPULATOR.return_all_to_bag(bag, round_ui.bag_ui)
+		await get_tree().create_timer(0.5).timeout
 		bag.shuffle()
-		_refill_hand()
+		await _refill_hand()
 		print("m req")
 
 func _on_play_requested():

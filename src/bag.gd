@@ -2,7 +2,7 @@ class_name Bag extends Node2D
 
 var game_tiles : Array[GameTile]
 
-signal tile_count_changed(int)
+signal tile_count_changed(int, bool)
 
 func initialize_from(bag_data : Array[GameTileData]):
 	for gtd in bag_data:
@@ -11,13 +11,13 @@ func initialize_from(bag_data : Array[GameTileData]):
 			add_to_bag(tile)
 	shuffle()
 
-func add_to_bag(game_tile : GameTile):
+func add_to_bag(game_tile : GameTile, animate : bool = false):
 	game_tile.set_state(GameTile.TileState.IDLE)
 	self.game_tiles.append(game_tile)
 	if game_tile.get_parent():
 		game_tile.get_parent().remove_child(game_tile)
 	
-	tile_count_changed.emit(game_tiles.size())
+	tile_count_changed.emit(game_tiles.size(), animate)
 	
 func shuffle() -> void:
 	var n := game_tiles.size()

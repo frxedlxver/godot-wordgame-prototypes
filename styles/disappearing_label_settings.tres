@@ -1,8 +1,8 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bm22qfiyln1hl"]
 
-[ext_resource type="FontFile" uid="uid://5rvatrjujh2u" path="res://misc/fonts/Minecraft.ttf" id="1_afn80"]
+[ext_resource type="FontFile" uid="uid://dtibc70p68oq" path="res://misc/fonts/vhs_gothic/vhs-gothic.ttf" id="1_1ue24"]
 
 [resource]
-font = ExtResource("1_afn80")
+font = ExtResource("1_1ue24")
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)

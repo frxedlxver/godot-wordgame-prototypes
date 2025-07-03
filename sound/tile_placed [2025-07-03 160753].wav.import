@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dqbckxuknv4ud"
+path="res://.godot/imported/tile_placed [2025-07-03 160753].wav-3859450caccd45f61df870dc0a80ad42.sample"
+
+[deps]
+
+source_file="res://sound/tile_placed [2025-07-03 160753].wav"
+dest_files=["res://.godot/imported/tile_placed [2025-07-03 160753].wav-3859450caccd45f61df870dc0a80ad42.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

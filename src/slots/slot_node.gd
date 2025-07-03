@@ -23,4 +23,5 @@ func empty():
 	return !has_tile
 	
 func effect():
-	pass
+	if slot_info:
+		return slot_info.get_slot_effect()

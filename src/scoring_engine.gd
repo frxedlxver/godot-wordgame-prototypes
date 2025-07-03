@@ -3,11 +3,11 @@
 class_name ScoringEngine
 extends Node          # Autoload
 
-const TIME_BETWEEN_ANIMATIONS = 0.6
+const TIME_BETWEEN_ANIMATIONS = 0.3
 
-signal points_updated(label : DisappearingLabel, new_score : int)
-signal turn_mult_updated(label : DisappearingLabel, new_mult : int)
-signal score_calculation_complete(points:int, mult:int)
+signal points_updated(new_score : int)
+signal turn_mult_updated(new_mult : int)
+signal score_calculation_complete(mult:int)
 
 func validate_turn(
 		board_text  : Array,      # Array[Array[String]]
@@ -48,17 +48,48 @@ func score_turn(
 	# 2. score each word (plays SFX & tweens inline) -------------------------
 	var pitch : float = 0.0
 	for w in words:
-		var res := await _score_word(w, pitch, turn_pts, turn_mul, board_tiles, slots)
 		
+		var hi_box = _spawn_word_box(w, slots)
+		
+		var res := await _score_word(w, pitch, turn_pts, turn_mul, board_tiles, slots)
 		turn_pts = res.turn_pts
 		turn_mul = res.turn_mul
 
-		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 		
 		var word_ctx = {
 			"word" : w["text"],
 			"words" : words
 		}
+		
+		turn_mul += w["text"].length()
+		var first_tile_pos = w["tiles"][0]
+		var first_tile = board_tiles[first_tile_pos.y][first_tile_pos.x]
+		var label = DisappearingLabel.new("+%d MULT" % w["text"].length(), first_tile.global_position)
+		self.add_child(label)
+		turn_mult_updated.emit(turn_mul)
+		
+		pitch += 0.04 * (w["text"].length() + 1)
+		for pos in w["tiles"]:
+			var tile : GameTile = board_tiles[pos.y][pos.x]
+			tile.animate_score()
+			AudioStreamManager.play_good_sound(pitch)
+		await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
+		
+			
+		for pos in w["tiles"]:
+			var slot = slots[pos.y][pos.x]
+			var slot_effect : SlotEffect = slot.effect()
+			if slot_effect:
+				match slot_effect.type:
+					SlotEffect.SlotEffectType.MULT_MULT:
+						turn_mul *= slot_effect.value
+						label = DisappearingLabel.new("MULT x%d" % slot_effect.value, slot.global_position)
+						self.add_child(label)
+						turn_mult_updated.emit(turn_mul)
+						AudioStreamManager.play_good_sound(pitch)
+						pitch += 0.04
+						await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
+		
 		
 		# --- word-level rune hooks ----------------------------------------
 		for node : RuneNode in G.current_run.rune_manager.get_runes():
@@ -68,8 +99,31 @@ func score_turn(
 						turn_mul += eff.value
 					RuneEffect.RuneEffectType.MULT_MULTIPLIER:
 						turn_mul *= eff.value
-
+		
+		hi_box.queue_free()
+	
+	print("score engine done scoring")
 	score_calculation_complete.emit(turn_pts, turn_mul, true)
+
+
+func _spawn_word_box(word : Dictionary, slots : Array) -> WordHighlightBox:
+	# Find the outer bounds of all tiles in the word (in global space)
+	var min_v := Vector2(INF, INF)
+	var max_v := Vector2(-INF, -INF)
+	for p : Vector2i in word["tiles"]:
+		var slot : SlotNode = slots[p.y][p.x]
+		var slot_size = slot.get_rect().size
+		var tl  = slot.global_position - slot_size * 0.5	# tile's top-left
+		min_v.x = min(min_v.x, tl.x)
+		min_v.y = min(min_v.y, tl.y)
+		max_v.x = max(max_v.x, tl.x + slot_size.x)
+		max_v.y = max(max_v.y, tl.y + slot_size.y)
+
+	var box := WordHighlightBox.new(max_v - min_v)
+	box.top_level = true					# keep it in screen space
+	box.position  = min_v
+	add_child(box)
+	return box
 
 # ───────────────────────  word scoring  ────────────────────────────────────
 func _score_word(
@@ -107,10 +161,9 @@ func _score_word(
 
 		if tile_pts > 0:
 			word_pts += tile_pts
-		turn_in_mul += 1
-		turn_mult_updated.emit(null, turn_in_mul)
+
 		var label = _spawn_score_label(str(tile_pts), tile.global_position)
-		points_updated.emit(label, turn_in_pts + word_pts)
+		points_updated.emit(turn_in_pts + word_pts)
 		AudioStreamManager.play_good_sound(pitch)
 		pitch += STEP
 
@@ -119,17 +172,6 @@ func _score_word(
 		
 		var slot : SlotNode = slots[pos.y][pos.x]
 		var slot_effect : SlotEffect = slot.slot_info.get_slot_effect()
-		
-		if slot_effect:
-			match slot_effect.type:
-				SlotEffect.SlotEffectType.MULT_MULT:
-					turn_in_mul *= slot_effect.value
-					label = _spawn_score_label(str("MULT x%d" % slot_effect.value), tile.global_position)
-					turn_mult_updated.emit(label, turn_in_mul)
-					AudioStreamManager.play_good_sound(pitch)
-					pitch += STEP
-					tile.animate_score()
-					await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 		
 		
 		# --- tile-level rune hooks ----------------------------------------
@@ -153,7 +195,7 @@ func _score_word(
 				if score_changed:
 					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
 					node.add_child(label)
-					points_updated.emit(label, turn_in_pts)
+					points_updated.emit(turn_in_pts)
 				if mult_changed:
 					node.add_child(label)
 					var new_label = DisappearingLabel.new(eff.exclamation, node.global_position, true)
@@ -164,8 +206,9 @@ func _score_word(
 					AudioStreamManager.play_good_sound(pitch)
 					pitch += STEP
 					tile.animate_score()
+					await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
 					
-				await get_tree().create_timer(TIME_BETWEEN_ANIMATIONS).timeout
+					
 				
 		idx += 1
 

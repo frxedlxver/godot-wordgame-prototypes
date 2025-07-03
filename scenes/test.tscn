@@ -1,13 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=11 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" uid="uid://bbbbx1l50sf2u" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
-[ext_resource type="AudioStream" uid="uid://wl75bn1082fu" path="res://sound/320901__suzenako__ding4.wav" id="4_pt8b2"]
-[ext_resource type="AudioStream" uid="uid://cluljka01ih0i" path="res://sound/89402__zimbot__woodsnap9.wav" id="5_bw5ow"]
+[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="4_uacia"]
+[ext_resource type="AudioStream" uid="uid://cxhoyigoljjel" path="res://sound/tile_hover [2025-07-03 160747].wav" id="5_uacia"]
 [ext_resource type="Script" uid="uid://dd6kkgeki3pay" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
 [ext_resource type="AudioStream" uid="uid://b3mp7yiiwevu3" path="res://sound/33912__necrosensual__aluminum08.wav" id="6_xtmnp"]
 [ext_resource type="AudioStream" uid="uid://6nyle0h0mi6f" path="res://sound/56253__qk__metal_03.wav" id="7_hdxxo"]
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="AudioStream" uid="uid://baxpxul0bwite" path="res://sound/add_to_bag [2025-07-03 160753].wav" id="8_yk7ts"]
 [ext_resource type="LabelSettings" uid="uid://bw117o5vg3h1s" path="res://styles/panel_title_label_settings.tres" id="9_uacia"]
 
 [node name="Node2D" type="Node2D"]
@@ -20,17 +21,20 @@ script = ExtResource("6_vu4vo")
 stream = ExtResource("7_l8hsb")
 
 [node name="Good" type="AudioStreamPlayer" parent="AudioStreamManager"]
-stream = ExtResource("4_pt8b2")
+stream = ExtResource("4_uacia")
 
 [node name="Click" type="AudioStreamPlayer" parent="AudioStreamManager"]
-stream = ExtResource("5_bw5ow")
-volume_db = -15.0
+stream = ExtResource("5_uacia")
 
 [node name="TurnTotal" type="AudioStreamPlayer" parent="AudioStreamManager"]
 stream = ExtResource("6_xtmnp")
 
 [node name="RoundTotal" type="AudioStreamPlayer" parent="AudioStreamManager"]
 stream = ExtResource("7_hdxxo")
+
+[node name="Bag" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("8_yk7ts")
+volume_db = 2.0
 
 [node name="Background" type="ColorRect" parent="."]
 z_index = -100

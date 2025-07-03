@@ -20,6 +20,9 @@ static func play_good_sound(pitch_mod : float = 0.0):
 	var stream : AudioStreamPlayer = _instance.get_node("Good")
 	stream.pitch_scale = 1.0 + pitch_mod
 	stream.play()
+	
+static func play_bag_sound():
+	_instance.get_node("Bag").play()
 
 static func reset_good_pitch():
 	var stream : AudioStreamPlayer = _instance.get_node("Good")

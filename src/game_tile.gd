@@ -90,7 +90,6 @@ func set_state(new_state : TileState) -> void:
 			$Area2D.input_event.disconnect(_on_area2d_input_event)
 			$Area2D.mouse_entered.disconnect(_on_area2d_mouse_enter)
 			$Area2D.mouse_exited .disconnect(_on_area2d_mouse_exit)
-			set_visual_state(VisualState.LOCKED_IN)
 
 func set_visual_state(vs : VisualState) -> void:
 	if vs == visual_state:
