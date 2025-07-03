@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://jb12j5p22epv"]
+[gd_scene load_steps=12 format=3 uid="uid://jb12j5p22epv"]
 
 [ext_resource type="Script" uid="uid://bbbbx1l50sf2u" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
@@ -9,6 +9,7 @@
 [ext_resource type="AudioStream" uid="uid://6nyle0h0mi6f" path="res://sound/56253__qk__metal_03.wav" id="7_hdxxo"]
 [ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
 [ext_resource type="AudioStream" uid="uid://baxpxul0bwite" path="res://sound/add_to_bag [2025-07-03 160753].wav" id="8_yk7ts"]
+[ext_resource type="AudioStream" uid="uid://crpghlmdhxlkj" path="res://sound/slot_pop.wav" id="9_ajshl"]
 [ext_resource type="LabelSettings" uid="uid://bw117o5vg3h1s" path="res://styles/panel_title_label_settings.tres" id="9_uacia"]
 
 [node name="Node2D" type="Node2D"]
@@ -34,6 +35,10 @@ stream = ExtResource("7_hdxxo")
 
 [node name="Bag" type="AudioStreamPlayer" parent="AudioStreamManager"]
 stream = ExtResource("8_yk7ts")
+volume_db = 2.0
+
+[node name="SlotPop" type="AudioStreamPlayer" parent="AudioStreamManager"]
+stream = ExtResource("9_ajshl")
 volume_db = 2.0
 
 [node name="Background" type="ColorRect" parent="."]

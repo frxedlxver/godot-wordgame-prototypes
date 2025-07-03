@@ -60,8 +60,53 @@ func _ready() -> void:
 
 			slot.highlighted.connect(_slot_highlighted)
 			slot.unhighlighted.connect(_slot_unhighlighted)
+			slot.hide()
 			
+func animate_in():
+	var slots : Array = []
+	for y in range(BOARD_SIZE.y):
+		for x in range(BOARD_SIZE.x):
+			var s : SlotNode = board_state[y][x].slot
+			if s:
+				slots.append(s)
+				s.scale = Vector2.ZERO					# start hidden
+	slots.shuffle()
 
+	var delay := 0.0
+	const DELAY_STEP := 0.012
+	const DURATION   := 0.15
+	for s in slots:
+		s.show()
+		
+		var tw := create_tween()
+		tw.set_ease(Tween.EASE_OUT)
+		tw.set_trans(Tween.TRANS_BACK)
+		tw.tween_property(s, "scale", Vector2.ONE, DURATION).set_delay(delay)
+		tw.finished.connect(func(): AudioStreamManager.play_pop_sound())
+		delay += DELAY_STEP
+		if s == slots.back():
+			await tw.finished
+	print("done animation function")
+
+
+func animate_out():
+	var slots : Array = []
+	for y in range(BOARD_SIZE.y):
+		for x in range(BOARD_SIZE.x):
+			var s : SlotNode = board_state[y][x].slot
+			if s:
+				slots.append(s)
+	slots.shuffle()
+
+	var delay := 0.0
+	const DELAY_STEP := 0.02
+	const DURATION   := 0.15
+	for s in slots:
+		var tw := create_tween()
+		tw.set_ease(Tween.EASE_IN)
+		tw.set_trans(Tween.TRANS_BACK)
+		tw.tween_property(s, "scale", Vector2.ZERO, DURATION).set_delay(delay)
+		delay += DELAY_STEP
 
 func _process(_dt : float) -> void:
 	if show_defs_held:

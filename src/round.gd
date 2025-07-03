@@ -98,14 +98,9 @@ func initialize(bag_data : Array[GameTileData], round_config : RunTable.RoundCfg
 	round_ui.play_requested.connect(_on_play_requested)
 
 func animate_in() -> void:
-	var board_tween = create_tween()
-	var board_target_pos = get_viewport_rect().size / 2
-	board_tween.tween_property(board, "global_position", board_target_pos, 0.3)
+	await board.animate_in()
 	round_ui.animate_in()
-	
-	while hand.tile_count() < G.current_run_data.max_hand_size and not bag.is_empty():
-		await get_tree().create_timer(0.05).timeout
-		hand.add_to_hand(bag.draw_tile())
+	_refill_hand()
 
 func end() -> void:
 	await animate_out()

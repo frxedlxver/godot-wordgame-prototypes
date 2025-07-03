@@ -33,6 +33,10 @@ static func reset_good_pitch():
 static func play_bad_sound():
 	_instance.get_node("Bad").play()
 	
+static func play_pop_sound():
+	if _instance.get_node("SlotPop").playing: return
+	_instance.get_node("SlotPop").play()
+	
 static func play_tick():
 	_instance.get_node("Click").pitch_scale = 1.0 + randf_range(-0.1, 0.1)
 	_instance.get_node("Click").play()

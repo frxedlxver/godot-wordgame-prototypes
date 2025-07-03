@@ -1,7 +1,8 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://ds2vvbrnjbcj6"]
 
-[ext_resource type="FontFile" uid="uid://dtibc70p68oq" path="res://misc/fonts/vhs_gothic/vhs-gothic.ttf" id="1_74yrw"]
+[ext_resource type="FontFile" uid="uid://cy42xag14mm7i" path="res://misc/fonts/superstar_2/superstarorig_memesbruh03.ttf" id="1_74yrw"]
 
 [resource]
 font = ExtResource("1_74yrw")
+font_size = 24
 font_color = Color(0, 0, 0, 1)

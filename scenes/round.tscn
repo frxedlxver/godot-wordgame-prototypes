@@ -34,7 +34,7 @@ round_ui = NodePath("Round UI")
 position = Vector2(1161, 747)
 
 [node name="Board" parent="." instance=ExtResource("5_tm448")]
-position = Vector2(480, -200)
+position = Vector2(480, 270)
 
 [node name="DebugShape" type="CollisionShape2D" parent="Board"]
 shape = SubResource("RectangleShape2D_wspnp")
