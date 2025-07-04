@@ -106,8 +106,6 @@ func animate_in() -> void:
 
 func end() -> void:
 	await animate_out()
-	
-
 
 func animate_out():
 	TILE_MANIPULATOR.return_all_to_bag(bag, round_ui.bag_ui)
@@ -168,6 +166,7 @@ func play_tiles() -> void:
 	await on_scoring_complete()
 
 func start_next_phase():
+	animate_in()
 	if current_phase == null:
 		current_phase = round_cfg.phase1
 	elif current_phase == round_cfg.phase1:

@@ -15,7 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://005p0i5deda5" path="res://assets/sprites/ui/points_panel.png" id="15_i86cr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wspnp"]
-size = Vector2(306, 306)
+size = Vector2(374, 374)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p5kuw"]
 bg_color = Color(0.36, 0.36, 0.36, 0.215686)
@@ -34,7 +34,7 @@ round_ui = NodePath("Round UI")
 position = Vector2(1161, 747)
 
 [node name="Board" parent="." instance=ExtResource("5_tm448")]
-position = Vector2(480, 270)
+position = Vector2(480, 240)
 
 [node name="DebugShape" type="CollisionShape2D" parent="Board"]
 shape = SubResource("RectangleShape2D_wspnp")

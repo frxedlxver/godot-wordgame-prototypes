@@ -33,7 +33,7 @@ func _on_phase_finished(won : bool):
 	if won:
 		round.animate_out()
 		await get_tree().create_timer(2.0).timeout
-		round.animate_in()
+		round.start_next_phase()
 	else:
 		round.end()
 		game_over()

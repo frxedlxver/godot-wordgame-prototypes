@@ -48,7 +48,7 @@ func ensure_balanced_draw():
 			if LettersNumbers.is_vowel(game_tiles[-i].letter):
 				vowel_count += 1
 		print("vowel_count: ", vowel_count)
-		if vowel_count == 3 or vowel_count == 4:
+		if vowel_count >= 2 and vowel_count <= 4:
 			balanced_draw_available = true
 		else:
 			shuffle()
