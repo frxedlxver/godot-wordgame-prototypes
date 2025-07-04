@@ -2,18 +2,19 @@
 
 [ext_resource type="Script" uid="uid://bbbbx1l50sf2u" path="res://src/main.gd" id="1_kiayv"]
 [ext_resource type="Material" uid="uid://b8r23b4qmepth" path="res://shaders/bg.tres" id="2_68p7e"]
-[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://sound/good.wav" id="4_uacia"]
-[ext_resource type="AudioStream" uid="uid://cxhoyigoljjel" path="res://sound/tile_hover [2025-07-03 160747].wav" id="5_uacia"]
-[ext_resource type="Script" uid="uid://dd6kkgeki3pay" path="res://src/audio_stream_manager.gd" id="6_vu4vo"]
-[ext_resource type="AudioStream" uid="uid://b3mp7yiiwevu3" path="res://sound/33912__necrosensual__aluminum08.wav" id="6_xtmnp"]
-[ext_resource type="AudioStream" uid="uid://6nyle0h0mi6f" path="res://sound/56253__qk__metal_03.wav" id="7_hdxxo"]
-[ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://sound/oops.wav" id="7_l8hsb"]
-[ext_resource type="AudioStream" uid="uid://baxpxul0bwite" path="res://sound/add_to_bag [2025-07-03 160753].wav" id="8_yk7ts"]
-[ext_resource type="AudioStream" uid="uid://crpghlmdhxlkj" path="res://sound/slot_pop.wav" id="9_ajshl"]
+[ext_resource type="AudioStream" uid="uid://p2hdrs2cxlli" path="res://assets/sound/good.wav" id="4_uacia"]
+[ext_resource type="AudioStream" uid="uid://cxhoyigoljjel" path="res://assets/sound/tile_hover [2025-07-03 160747].wav" id="5_uacia"]
+[ext_resource type="Script" uid="uid://dd6kkgeki3pay" path="res://src/globals/audio_stream_manager.gd" id="6_vu4vo"]
+[ext_resource type="AudioStream" uid="uid://b3mp7yiiwevu3" path="res://assets/sound/33912__necrosensual__aluminum08.wav" id="6_xtmnp"]
+[ext_resource type="AudioStream" uid="uid://6nyle0h0mi6f" path="res://assets/sound/56253__qk__metal_03.wav" id="7_hdxxo"]
+[ext_resource type="AudioStream" uid="uid://crhx58h4alxqc" path="res://assets/sound/oops.wav" id="7_l8hsb"]
+[ext_resource type="AudioStream" uid="uid://baxpxul0bwite" path="res://assets/sound/add_to_bag [2025-07-03 160753].wav" id="8_yk7ts"]
+[ext_resource type="AudioStream" uid="uid://crpghlmdhxlkj" path="res://assets/sound/slot_pop.wav" id="9_ajshl"]
 [ext_resource type="LabelSettings" uid="uid://bw117o5vg3h1s" path="res://styles/panel_title_label_settings.tres" id="9_uacia"]
-[ext_resource type="AudioStream" uid="uid://dqbckxuknv4ud" path="res://sound/tile_placed [2025-07-03 160753].wav" id="10_ghpyy"]
+[ext_resource type="AudioStream" uid="uid://dqbckxuknv4ud" path="res://assets/sound/tile_placed [2025-07-03 160753].wav" id="10_ghpyy"]
 
 [node name="Node2D" type="Node2D"]
+scale = Vector2(0.997088, 1)
 script = ExtResource("1_kiayv")
 
 [node name="AudioStreamManager" type="Node" parent="."]

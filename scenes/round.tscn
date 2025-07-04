@@ -1,18 +1,18 @@
 [gd_scene load_steps=17 format=3 uid="uid://boutt7jysbfio"]
 
-[ext_resource type="Script" uid="uid://ddftis3dxupkk" path="res://src/round.gd" id="1_grh2k"]
-[ext_resource type="Script" uid="uid://bfinnviqdmsgn" path="res://src/round_ui.gd" id="2_ie7ca"]
+[ext_resource type="Script" uid="uid://ddftis3dxupkk" path="res://src/systems/rounds/round.gd" id="1_grh2k"]
+[ext_resource type="Script" uid="uid://bfinnviqdmsgn" path="res://src/systems/rounds/round_ui.gd" id="2_ie7ca"]
 [ext_resource type="PackedScene" uid="uid://crpel47irxv8u" path="res://scenes/bag_ui.tscn" id="3_istxk"]
 [ext_resource type="PackedScene" uid="uid://c6ynr0i46i876" path="res://scenes/bag.tscn" id="4_3w6v7"]
 [ext_resource type="LabelSettings" uid="uid://bm22qfiyln1hl" path="res://styles/disappearing_label_settings.tres" id="4_ywbev"]
-[ext_resource type="Texture2D" uid="uid://by8yyi62qjm76" path="res://sprites/ui/play_button_normal.tres" id="5_p5kuw"]
+[ext_resource type="Texture2D" uid="uid://by8yyi62qjm76" path="res://assets/sprites/ui/play_button_normal.tres" id="5_p5kuw"]
 [ext_resource type="PackedScene" uid="uid://b4qjmxvgj453p" path="res://scenes/board.tscn" id="5_tm448"]
-[ext_resource type="Texture2D" uid="uid://ct2y82lr866jv" path="res://sprites/ui/play_button_pressed.tres" id="6_h7h1o"]
+[ext_resource type="Texture2D" uid="uid://ct2y82lr866jv" path="res://assets/sprites/ui/play_button_pressed.tres" id="6_h7h1o"]
 [ext_resource type="PackedScene" uid="uid://dhbnxd5tvuybp" path="res://scenes/hand.tscn" id="6_x02pj"]
-[ext_resource type="Texture2D" uid="uid://h0x0ejtoanhm" path="res://sprites/ui/play_button_hover.tres" id="7_i86cr"]
-[ext_resource type="Texture2D" uid="uid://2jtro6xs4jmx" path="res://sprites/ui/play_button_disabled.tres" id="8_h7h1o"]
-[ext_resource type="Texture2D" uid="uid://br84r2qlenp3a" path="res://sprites/ui/mulligan.png" id="9_b6fnw"]
-[ext_resource type="Texture2D" uid="uid://005p0i5deda5" path="res://sprites/ui/points_panel.png" id="15_i86cr"]
+[ext_resource type="Texture2D" uid="uid://h0x0ejtoanhm" path="res://assets/sprites/ui/play_button_hover.tres" id="7_i86cr"]
+[ext_resource type="Texture2D" uid="uid://2jtro6xs4jmx" path="res://assets/sprites/ui/play_button_disabled.tres" id="8_h7h1o"]
+[ext_resource type="Texture2D" uid="uid://br84r2qlenp3a" path="res://assets/sprites/ui/mulligan.png" id="9_b6fnw"]
+[ext_resource type="Texture2D" uid="uid://005p0i5deda5" path="res://assets/sprites/ui/points_panel.png" id="15_i86cr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wspnp"]
 size = Vector2(306, 306)
@@ -85,10 +85,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 323.0
-offset_top = 492.0
-offset_right = 387.0
-offset_bottom = 532.0
+offset_left = 8.0
+offset_top = 490.0
+offset_right = 72.0
+offset_bottom = 530.0
 grow_horizontal = 1
 grow_vertical = 1
 
@@ -166,10 +166,10 @@ vertical_alignment = 1
 
 [node name="Plays" type="HBoxContainer" parent="Round UI"]
 layout_mode = 2
-offset_left = -450.0
-offset_top = 248.0
-offset_right = -142.0
-offset_bottom = 264.0
+offset_left = -449.0
+offset_top = 185.0
+offset_right = -141.0
+offset_bottom = 203.0
 
 [node name="Label" type="Label" parent="Round UI/Plays"]
 layout_mode = 2

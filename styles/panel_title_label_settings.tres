@@ -1,6 +1,6 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bw117o5vg3h1s"]
 
-[ext_resource type="FontFile" uid="uid://cy42xag14mm7i" path="res://misc/fonts/superstar_2/superstarorig_memesbruh03.ttf" id="1_w7i7x"]
+[ext_resource type="FontFile" uid="uid://cy42xag14mm7i" path="res://assets/misc/fonts/superstar_2/superstarorig_memesbruh03.ttf" id="1_w7i7x"]
 
 [resource]
 font = ExtResource("1_w7i7x")

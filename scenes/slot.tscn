@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://imys0a2abki"]
 
-[ext_resource type="Texture2D" uid="uid://c42141n66j5cy" path="res://sprites/slots/slot_normal.tres" id="1_ic0fu"]
+[ext_resource type="Texture2D" uid="uid://c42141n66j5cy" path="res://assets/sprites/slots/slot_normal.tres" id="1_ic0fu"]
 [ext_resource type="Script" uid="uid://cgywsqy84hlwx" path="res://src/slots/slot_node.gd" id="2_c802k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gv7av"]

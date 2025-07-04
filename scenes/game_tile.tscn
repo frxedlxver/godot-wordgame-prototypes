@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://d0qbjjhu3adne"]
 
-[ext_resource type="Texture2D" uid="uid://c87q5xsoyqruy" path="res://sprites/tile.png" id="1_ydtsf"]
-[ext_resource type="Script" uid="uid://d0qm54v6bfsdf" path="res://src/game_tile.gd" id="2_0evji"]
-[ext_resource type="Texture2D" uid="uid://j3r5xangghk8" path="res://sprites/scoretab.png" id="3_04uoi"]
+[ext_resource type="Texture2D" uid="uid://c87q5xsoyqruy" path="res://assets/sprites/tile.png" id="1_ydtsf"]
+[ext_resource type="Script" uid="uid://d0qm54v6bfsdf" path="res://src/gameplay/tiles/game_tile.gd" id="2_0evji"]
+[ext_resource type="Texture2D" uid="uid://j3r5xangghk8" path="res://assets/sprites/scoretab.png" id="3_04uoi"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_r1h57"]
 size = Vector2(32, 32)
@@ -12,6 +12,7 @@ texture = ExtResource("1_ydtsf")
 script = ExtResource("2_0evji")
 
 [node name="Letter" type="Sprite2D" parent="."]
+self_modulate = Color(0, 0, 0, 1)
 z_index = 2
 
 [node name="scoretab" type="Sprite2D" parent="Letter"]

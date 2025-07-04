@@ -1,6 +1,6 @@
 [gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bm22qfiyln1hl"]
 
-[ext_resource type="FontFile" uid="uid://dtibc70p68oq" path="res://misc/fonts/vhs_gothic/vhs-gothic.ttf" id="1_1ue24"]
+[ext_resource type="FontFile" uid="uid://dtibc70p68oq" path="res://assets/misc/fonts/vhs_gothic/vhs-gothic.ttf" id="1_1ue24"]
 
 [resource]
 font = ExtResource("1_1ue24")

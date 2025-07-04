@@ -17,11 +17,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-G="*res://src/game_state.gd"
-WORD_CHECKER="*res://src/word_checker.gd"
-SAVE_MANAGER="*res://src/save_manager.gd"
-SCORING_ENGINE="*res://src/scoring_engine.gd"
-TILE_MANIPULATOR="*res://src/tile_manipulator.gd"
+G="*res://src/globals/game_state.gd"
+WORD_CHECKER="*res://src/systems/words/word_checker.gd"
+SAVE_MANAGER="*res://src/globals/save_manager.gd"
+SCORING_ENGINE="*res://src/systems/scoring/scoring_engine.gd"
+TILE_MANIPULATOR="*res://src/globals/tile_manipulator.gd"
 
 [display]
 

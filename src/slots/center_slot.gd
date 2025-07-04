@@ -1,7 +1,7 @@
 class_name CenterSlot extends SlotInfo
 
 func _init() -> void:
-	self.tex = load("res://sprites/slots/slot_center.tres")
+	self.tex = load("res://assets/sprites/slots/slot_center.tres")
 
 func get_slot_effect():
 	var effect : SlotEffect = SlotEffect.new()

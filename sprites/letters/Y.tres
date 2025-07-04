@@ -1,7 +1,0 @@
-[gd_resource type="AtlasTexture" load_steps=2 format=3]
-
-[ext_resource type="Texture2D" uid="uid://q1c5hcprlugq" path="res://sprites/letters/charmap.png" id="1_cw5bw"]
-
-[resource]
-atlas = ExtResource("1_cw5bw")
-region = Rect2(32, 32, 16, 16)
