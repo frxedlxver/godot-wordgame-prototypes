@@ -33,6 +33,9 @@ static func reset_good_pitch():
 static func play_bad_sound():
 	_instance.get_node("Bad").play()
 	
+static func play_tile_placed_sound():
+	_instance.get_node("PlaceTile").play()
+	
 static func play_pop_sound():
 	if _instance.get_node("SlotPop").playing: return
 	_instance.get_node("SlotPop").play()

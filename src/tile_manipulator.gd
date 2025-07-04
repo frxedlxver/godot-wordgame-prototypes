@@ -137,6 +137,7 @@ func _on_tile_released(tile : GameTile) -> void:
 		_board.place_tile_at(tile, dst_slot)    # 4) slide into slot
 		tile.placed_on_board()
 		_active_tile = null
+		AudioStreamManager.play_tile_placed_sound()
 	else:
 		_hand.add_to_hand(tile)
 		tile.set_state(GameTile.TileState.IDLE)
